@@ -17,13 +17,12 @@
             margin: 0; padding: 0; background: var(--bg); color: var(--text);
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             height: 100vh; overflow: hidden; display: flex; flex-direction: column;
-            user-select: none; -webkit-tap-highlight-color: transparent;
-            /* ВАЖНО: Отключает зум и задержки браузера */
-            touch-action: none; 
+            user-select: none; -webkit-tap-highlight-color: transparent; touch-action: none;
         }
         .screen { display: none; flex-direction: column; height: 100%; padding: 20px; box-sizing: border-box; overflow-y: auto; }
         .screen.active { display: flex; }
 
+        /* HEADER & STATS */
         .header {
             display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
             background: var(--card); padding: 15px; border-radius: 16px; margin-bottom: 20px;
@@ -37,15 +36,13 @@
         .balance { font-size: 42px; font-weight: 900; background: var(--grad-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .curr { font-size: 14px; color: var(--text-dim); font-weight: bold; }
 
-        /* TAP AREA - МУЛЬТИТАЧ */
+        /* TAP AREA */
         .tap-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative; }
         .tap-btn {
             width: 250px; height: 250px; border-radius: 50%;
             background: var(--grad-main); box-shadow: 0 0 60px rgba(168, 85, 247, 0.4);
-            position: relative; cursor: pointer;
-            display: flex; justify-content: center; align-items: center;
-            /* ВАЖНО для быстрой игры */
-            touch-action: manipulation; 
+            position: relative; cursor: pointer; display: flex; justify-content: center; align-items: center;
+            touch-action: manipulation;
         }
         .tap-btn::before { content: "PC"; font-size: 80px; font-weight: 900; color: rgba(255,255,255,0.2); }
         .tap-btn:active { transform: scale(0.96); transition: 0.05s; }
@@ -54,6 +51,7 @@
         .en-bar-bg { height: 8px; background: #27272a; border-radius: 4px; overflow: hidden; margin-top: 5px; }
         .en-bar-fill { height: 100%; background: var(--grad-gold); width: 100%; transition: width 0.1s linear; }
 
+        /* SHOP */
         .section-title { font-size: 18px; font-weight: 800; margin: 20px 0 10px; color: #fff; }
         .item {
             display: flex; justify-content: space-between; align-items: center;
@@ -62,18 +60,17 @@
         }
         .item-left h3 { margin: 0; font-size: 15px; color: #fff; }
         .item-left p { margin: 4px 0 0; font-size: 11px; color: var(--text-dim); }
-        
         .btn { border: none; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 12px; cursor: pointer; color: #000; }
         .btn-buy { background: var(--grad-green); }
         .btn-lock { background: #27272a; color: #555; pointer-events: none; }
         .btn-daily { width: 100%; background: var(--grad-main); color: #fff; font-size: 16px; padding: 20px; margin-bottom: 20px; }
         .btn-daily.cd { opacity: 0.5; pointer-events: none; background: #27272a; }
 
+        /* LEADERBOARD */
         .row { display: flex; justify-content: space-between; padding: 14px; background: var(--card); margin-bottom: 8px; border-radius: 12px; }
         .rank { font-weight: 900; width: 40px; color: var(--text-dim); }
         .rank.top { color: #facc15; }
         
-        /* FOOTER RANK */
         .my-rank {
             position: fixed; bottom: 80px; left: 20px; right: 20px;
             background: var(--grad-main); padding: 15px; border-radius: 12px;
@@ -91,9 +88,18 @@
 
         .float { position: absolute; color: #fff; font-weight: 900; font-size: 28px; animation: float 0.5s forwards; pointer-events: none; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
         @keyframes float { to { transform: translateY(-80px) scale(1.5); opacity: 0; } }
+        
+        /* КНОПКА РЕМОНТА (Показывается при ошибке) */
+        #repair-btn {
+            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+            background: #ef4444; color: white; padding: 10px 20px; border-radius: 20px;
+            font-weight: bold; display: none; z-index: 100;
+        }
     </style>
 </head>
 <body>
+    <a id="repair-btn" href="#" target="_blank">🛠 ПОЧИНИТЬ ИГРУ</a>
+
     <div id="screen-game" class="screen active">
         <div class="header">
             <div class="stat-box">
@@ -110,7 +116,7 @@
             </div>
         </div>
         <div class="balance-wrap">
-            <div class="balance"><span id="bal">0</span></div>
+            <div class="balance"><span id="bal">Loading</span></div>
             <div class="curr">Крипторублей</div>
         </div>
         <div class="tap-area">
@@ -155,8 +161,15 @@
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        // ВСТАВЬ СВОЙ URL
-        const API = "https://aboba1234.pythonanywhere.com"; 
+        
+        // ==========================================
+        // 👇 ВСТАВЬ СВОЙ URL ТУТ!
+        const BASE_URL = "https://ТВОЙ_НИК.pythonanywhere.com"; 
+        const API = BASE_URL + "/api";
+        // ==========================================
+
+        // Кнопка ремонта ведет на главную страницу сервера
+        document.getElementById('repair-btn').href = BASE_URL;
 
         const user = tg.initDataUnsafe.user;
         const uid = user ? user.id : 123;
@@ -186,6 +199,8 @@
         async function init() {
             const d = await req('/init', {start_param:startParam});
             if(d) {
+                // Если данные пришли - скрываем кнопку ремонта
+                document.getElementById('repair-btn').style.display = 'none';
                 const u = d.user;
                 s = { 
                     bal: u.balance, en: u.energy, maxEn: u.max_energy, 
@@ -195,6 +210,10 @@
                     rank: d.rank, last_daily: u.last_daily 
                 };
                 draw(); drawShop();
+            } else {
+                // Если данных нет - показываем кнопку ремонта
+                document.getElementById('repair-btn').style.display = 'block';
+                document.getElementById('bal').innerText = "Error";
             }
         }
 
@@ -259,25 +278,58 @@
             if(res && res.status==='ok') init();
         }
 
-        // --- МУЛЬТИТАЧ ОБРАБОТЧИК ---
         const btn = document.getElementById('tapBtn');
-        // Используем pointerdown для мгновенной реакции
         btn.addEventListener('pointerdown', (e) => {
-            e.preventDefault(); // Запрет зума
-            
-            const cost = s.multi; // Трата энергии равна уровню клика
+            e.preventDefault(); 
+            const cost = s.multi; 
             if(s.en >= cost) {
-                s.bal += cost; 
-                s.en -= cost; 
-                queue++; 
-                draw();
-                
-                // Анимация (+цифра)
+                s.bal += cost; s.en -= cost; queue++; draw();
                 const el = document.createElement('div');
                 el.className='float'; el.innerText=`+${cost}`;
-                // Используем координаты события
-                el.style.left = e.clientX + 'px';
-                el.style.top = e.clientY - 40 + 'px';
+                el.style.left=e.clientX+'px'; el.style.top=e.clientY-40+'px';
                 document.body.appendChild(el);
-                setTimeout(()=>el.remove
+                setTimeout(()=>el.remove(), 500);
+                tg.HapticFeedback.impactOccurred('light');
+            }
+        });
 
+        setInterval(async()=>{ if(queue>0) { await req('/tap', {clicks:queue}); queue=0; } }, 1500);
+        setInterval(()=>{
+            s.en = Math.min(s.maxEn, s.en + (1+s.ram*0.5)/5);
+            s.bal += (s.mine*5 * (1+s.soft*0.1))/5;
+            draw();
+        }, 200);
+
+        async function loadTop() {
+            const el = document.getElementById('leaderboard');
+            el.innerHTML = "<div style='text-align:center;color:#555'>Загрузка...</div>";
+            const d = await req('/leaderboard');
+            if(!d) return;
+            el.innerHTML = "";
+            d.forEach((u,i) => {
+                el.innerHTML += `<div class="row"><span class="rank ${i<3?'top':''}">${i+1}</span><span style="font-weight:bold">${u.name}</span><span style="color:#34d399;font-weight:bold">+${format(u.income)}/ч</span></div>`;
+            });
+            document.getElementById('rank-footer').style.display = 'flex';
+            document.getElementById('my-name').innerText = uname;
+            document.getElementById('footer-rank').innerText = s.rank;
+        }
+
+        function tab(t, btn) {
+            document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active'));
+            document.getElementById('screen-'+t).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
+            btn.classList.add('active');
+            if(t==='top') loadTop(); else document.getElementById('rank-footer').style.display = 'none';
+            if(t==='shop') drawShop();
+        }
+
+        function format(n) {
+            if(n>=1000000) return (n/1000000).toFixed(2)+'M';
+            if(n>=1000) return (n/1000).toFixed(1)+'k';
+            return Math.floor(n);
+        }
+
+        init();
+    </script>
+</body>
+</html>
