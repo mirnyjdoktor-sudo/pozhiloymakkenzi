@@ -3,391 +3,410 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zolo Kombat</title>
+    <title>Zolo Kombat 2.0</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #1c1f24;
-            --card-bg: #2b2f36;
-            --accent-gold: #f3ba2f;
-            --text-primary: #ffffff;
-            --text-secondary: #8b939e;
-            --danger: #ff4b4b;
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --accent-gold: #ffd700;
+            --accent-green: #2ea043;
+            --accent-blue: #1f6feb;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
         }
 
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background-color: var(--bg-color);
             color: var(--text-primary);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
+            font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
             height: 100vh;
             overflow: hidden;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* --- Верхняя статистика --- */
-        .header-stats {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px 20px;
-            background: var(--card-bg);
-            border-bottom-left-radius: 20px;
-            border-bottom-right-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            margin-bottom: 10px;
-        }
-
-        .stat-box { text-align: center; }
-        .stat-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
-        .stat-value { font-size: 16px; font-weight: bold; color: var(--accent-gold); margin-top: 4px; }
-
-        /* --- Баланс --- */
-        .main-balance {
-            flex-grow: 0;
-            text-align: center;
-            margin: 10px 0;
-            font-size: 42px;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-shadow: 0 0 20px rgba(243, 186, 47, 0.3);
-        }
-        .coin-icon-small { 
-            width: 36px; height: 36px; margin-right: 10px; 
-            background: radial-gradient(circle, #ffd700, #f3ba2f);
-            border-radius: 50%; border: 2px solid #fff;
-            box-shadow: 0 0 10px #f3ba2f;
-        }
-
-        /* --- Зона тапа (Иван Золо) --- */
-        .tap-area-container {
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            z-index: 10;
-        }
-
-        .tap-img {
-            width: 260px;
-            height: 260px;
-            /* Ссылка на картинку. Если есть своя - замени на 'zolo.png' */
-            background-image: url('https://imgur.com/a/mxuPXvg'); 
-            background-size: cover;
-            background-position: center;
-            border-radius: 50%;
-            box-shadow: 0 0 60px rgba(243, 186, 47, 0.2);
-            cursor: pointer;
-            transition: transform 0.05s ease;
-            image-rendering: pixelated; /* Пиксельный стиль */
-            border: 4px solid rgba(255, 255, 255, 0.1);
-        }
-        .tap-img:active { transform: scale(0.92); }
-
-        /* --- Энергия --- */
-        .energy-container { padding: 0 20px; margin-bottom: 15px; }
-        .energy-text { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; font-weight: 600;}
-        .progress-bar-bg { height: 12px; background: #3b4049; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
-        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #f3ba2f, #ffeb3b); width: 100%; transition: width 0.2s ease-out; }
-
-        /* --- Нижнее меню --- */
-        .bottom-nav {
-            display: flex;
-            justify-content: space-around;
-            background: rgba(43, 47, 54, 0.95);
-            padding: 12px 0 20px 0;
-            backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(255,255,255,0.05);
-        }
-        .nav-item {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            color: var(--text-secondary);
-            font-size: 11px;
-            cursor: pointer;
-            width: 33%;
-            transition: transform 0.1s;
-        }
-        .nav-item:active { transform: scale(0.9); }
-        .nav-icon { font-size: 22px; margin-bottom: 4px; filter: grayscale(100%); transition: filter 0.3s; }
-        .nav-item.active .nav-icon { filter: grayscale(0%); }
-        .nav-item.active { color: var(--text-primary); }
-
-        /* --- Анимации и эффекты --- */
-        .floating-text {
-            position: absolute;
-            font-size: 32px;
-            font-weight: 900;
-            color: white;
-            pointer-events: none;
-            animation: floatUp 0.8s ease-out forwards;
-            text-shadow: 2px 2px 0px #000;
-            z-index: 20;
-        }
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-120px) scale(1.2); }
+            user-select: none;
         }
 
-        #status-bar {
-            position: absolute; top: 0; left: 0; width: 100%;
-            text-align: center; font-size: 10px; padding: 2px;
-            background: rgba(0,0,0,0.5); display: none;
+        /* Экраны (Вкладки) */
+        .screen { display: none; height: 100%; flex-direction: column; padding: 15px; overflow-y: auto; }
+        .screen.active { display: flex; }
+
+        /* HEADER STATS */
+        .stats-grid {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+            background: var(--card-bg); padding: 15px; border-radius: 15px; margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        .stat-item { text-align: center; }
+        .stat-label { font-size: 10px; color: var(--text-secondary); text-transform: uppercase; }
+        .stat-val { font-size: 14px; font-weight: bold; color: var(--accent-gold); }
+
+        /* BIG BALANCE */
+        .balance-container { text-align: center; margin: 20px 0; }
+        .balance-val { font-size: 48px; font-weight: 800; text-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+
+        /* TAP AREA */
+        .tap-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative; }
+        .tap-btn {
+            width: 260px; height: 260px;
+            background-image: url('https://i.imgur.com/8QlqWkH.png');
+            background-size: cover; border-radius: 50%;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.2);
+            transition: transform 0.05s;
+            cursor: pointer; border: 5px solid rgba(255,255,255,0.1);
+        }
+        .tap-btn:active { transform: scale(0.95); }
+
+        /* ENERGY */
+        .energy-bar-container { height: 10px; background: #333; border-radius: 5px; margin: 10px 20px; overflow: hidden; }
+        .energy-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #f1c40f); width: 100%; transition: width 0.2s; }
+
+        /* UPGRADES LIST */
+        .upgrade-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--card-bg); padding: 15px; margin-bottom: 10px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05); transition: 0.2s;
+        }
+        .upgrade-info h4 { margin: 0; font-size: 16px; }
+        .upgrade-info p { margin: 5px 0 0; font-size: 12px; color: var(--text-secondary); }
+        
+        .buy-btn {
+            padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 13px;
+            background: #333; color: #777; border: none; cursor: default;
+            transition: 0.3s;
+        }
+        /* Когда денег хватает - кнопка цветная */
+        .buy-btn.can-buy {
+            background: linear-gradient(45deg, var(--accent-green), #238636);
+            color: white; cursor: pointer;
+            box-shadow: 0 0 10px rgba(46, 160, 67, 0.4);
+        }
+        .buy-btn.can-buy:active { transform: scale(0.95); }
+
+        /* LEADERBOARD & FRIENDS */
+        .list-item {
+            display: flex; justify-content: space-between; padding: 15px;
+            background: var(--card-bg); margin-bottom: 8px; border-radius: 10px;
+            border-bottom: 1px solid #333;
+        }
+        .rank-num { font-weight: bold; color: var(--accent-gold); width: 30px; }
+        .daily-btn {
+            width: 100%; padding: 20px; background: linear-gradient(45deg, #7f00ff, #e100ff);
+            border: none; border-radius: 15px; color: white; font-weight: bold; font-size: 18px;
+            margin-bottom: 20px; cursor: pointer; opacity: 0.5; pointer-events: none;
+        }
+        .daily-btn.active { opacity: 1; pointer-events: auto; animation: pulse 2s infinite; }
+
+        @keyframes pulse { 0% {box-shadow: 0 0 0 0 rgba(225, 0, 255, 0.4);} 70% {box-shadow: 0 0 0 10px rgba(225, 0, 255, 0);} 100% {box-shadow: 0 0 0 0 rgba(225, 0, 255, 0);} }
+
+        /* NAVIGATION */
+        .bottom-nav {
+            display: flex; justify-content: space-around; background: #010409;
+            padding: 15px 0 25px; border-top: 1px solid #30363d;
+        }
+        .nav-btn {
+            display: flex; flex-direction: column; align-items: center; color: var(--text-secondary);
+            font-size: 10px; cursor: pointer; transition: 0.2s;
+        }
+        .nav-btn.active { color: var(--text-primary); transform: scale(1.1); }
+        .nav-icon { font-size: 24px; margin-bottom: 5px; }
+
+        /* FLOATING TEXT */
+        .float-text { position: absolute; color: white; font-weight: bold; font-size: 24px; animation: floatUp 0.8s forwards; pointer-events: none; }
+        @keyframes floatUp { to { transform: translateY(-100px); opacity: 0; } }
+
+        #error-toast {
+            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+            background: #ff4b4b; color: white; padding: 10px 20px; border-radius: 20px;
+            font-size: 12px; display: none; z-index: 100;
         }
     </style>
 </head>
 <body>
 
-    <div id="status-bar">Connecting...</div>
+    <div id="error-toast">Connection Lost</div>
 
-    <div class="header-stats">
-        <div class="stat-box">
-            <div class="stat-label">Доход в час</div>
-            <div class="stat-value">+<span id="mining-stat">0</span></div>
+    <div id="screen-game" class="screen active">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-label">Доход в час</div>
+                <div class="stat-val">+<span id="mining-stat">0</span></div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Энергия</div>
+                <div class="stat-val"><span id="energy">1500</span></div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Клик</div>
+                <div class="stat-val">x<span id="multitap-stat">1</span></div>
+            </div>
         </div>
-        <div class="stat-box">
-            <div class="stat-label">Уровень</div>
-            <div class="stat-value">LVL <span id="level-stat">1</span></div>
+
+        <div class="balance-container">
+            <div class="balance-val" id="balance">0</div>
         </div>
-        <div class="stat-box">
-            <div class="stat-label">Сила клика</div>
-            <div class="stat-value">x<span id="multitap-stat">1</span></div>
+
+        <div class="tap-area">
+            <div class="tap-btn" id="tapBtn"></div>
+        </div>
+
+        <div class="energy-bar-container">
+            <div class="energy-fill" id="energy-bar"></div>
         </div>
     </div>
 
-    <div class="main-balance">
-        <div class="coin-icon-small"></div>
-        <span id="balance">Loading...</span>
-    </div>
+    <div id="screen-earn" class="screen">
+        <h2>🔥 Прокачка</h2>
+        
+        <button id="daily-btn" class="daily-btn" onclick="claimDaily()">🎁 Забрать награду (50k)</button>
 
-    <div class="tap-area-container">
-        <div class="tap-img" id="tapBtn"></div>
-    </div>
-
-    <div class="energy-container">
-        <div class="energy-text">
-            <span>⚡ Energy</span>
-            <span><span id="energy">1500</span> / <span id="max-energy">1500</span></span>
+        <div class="upgrade-item">
+            <div class="upgrade-info">
+                <h4>🚀 Multitap</h4>
+                <p>Увеличивает доход за клик</p>
+            </div>
+            <button class="buy-btn" id="btn-multi" onclick="buy('multitap')">200</button>
         </div>
-        <div class="progress-bar-bg">
-            <div class="progress-bar-fill" id="energy-bar"></div>
+
+        <div class="upgrade-item">
+            <div class="upgrade-info">
+                <h4>⛏️ Mining</h4>
+                <p>Пассивный доход в секунду</p>
+            </div>
+            <button class="buy-btn" id="btn-mine" onclick="buy('mining')">1000</button>
+        </div>
+    </div>
+
+    <div id="screen-social" class="screen">
+        <h2>🤝 Рефералы</h2>
+        <div style="background: var(--card-bg); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+            <p>Пригласи друга и получи <b>5,000 монет</b>!</p>
+            <button class="buy-btn can-buy" style="width:100%" onclick="inviteFriend()">Пригласить друга</button>
+        </div>
+
+        <h2>🏆 Таблица лидеров</h2>
+        <div id="leaderboard-list">
+            <div style="text-align:center; color:#777">Загрузка...</div>
         </div>
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-item active">
+        <div class="nav-btn active" onclick="switchTab('game', this)">
             <div class="nav-icon">🐹</div>
-            <div>Tap</div>
+            <div>Игра</div>
         </div>
-        <div class="nav-item" onclick="buyUpgrade('mining')">
-            <div class="nav-icon">⛏️</div>
-            <div>Mine (<span id="price-mine">1000</span>)</div>
-        </div>
-        <div class="nav-item" onclick="buyUpgrade('multitap')">
+        <div class="nav-btn" onclick="switchTab('earn', this)">
             <div class="nav-icon">🚀</div>
-            <div>Boost (<span id="price-multi">200</span>)</div>
+            <div>Бусты</div>
+        </div>
+        <div class="nav-btn" onclick="switchTab('social', this)">
+            <div class="nav-icon">👥</div>
+            <div>Друзья</div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); 
-        tg.enableClosingConfirmation();
+        tg.expand();
 
-        // =================================================================
-        // 👇 ВСТАВЬ СЮДА СВОЮ ССЫЛКУ ОТ NGROK (https://....ngrok-free.app)
+        // ==========================================
+        // 👇 ВСТАВЬ СВОЙ АДРЕС НИЖЕ 👇
         const SERVER_URL = "https://aboba1234.pythonanywhere.com/"; 
-        // 👆 ОБЯЗАТЕЛЬНО ПРОВЕРЬ, ЧТОБЫ В КОНЦЕ НЕ БЫЛО СЛЕША "/"
-        // =================================================================
+        // ==========================================
 
-        const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 99999;
-        const statusBar = document.getElementById('status-bar');
+        const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 111;
+        // Получаем реферальный параметр (start_param)
+        const startParam = tg.initDataUnsafe.start_param || null;
 
         let gameState = { balance: 0, energy: 1500, multitap: 1, mining: 0 };
         let clicksQueue = 0;
-        const maxEnergy = 1500;
 
-        // Элементы UI
-        const balanceEl = document.getElementById('balance');
-        const energyEl = document.getElementById('energy');
-        const energyBar = document.getElementById('energy-bar');
-        const multitapStat = document.getElementById('multitap-stat');
-        const miningStat = document.getElementById('mining-stat');
-        const tapBtn = document.getElementById('tapBtn');
-        const tapContainer = document.querySelector('.tap-area-container');
+        // UI Элементы
+        const els = {
+            balance: document.getElementById('balance'),
+            energy: document.getElementById('energy'),
+            energyBar: document.getElementById('energy-bar'),
+            multiStat: document.getElementById('multitap-stat'),
+            mineStat: document.getElementById('mining-stat'),
+            btnMulti: document.getElementById('btn-multi'),
+            btnMine: document.getElementById('btn-mine'),
+            dailyBtn: document.getElementById('daily-btn'),
+            errorToast: document.getElementById('error-toast')
+        };
 
-        // --- Функция для отправки запросов (с защитой от ngrok) ---
+        // --- API ФУНКЦИЯ ---
         async function apiRequest(endpoint, body = {}) {
             try {
-                const response = await fetch(`${SERVER_URL}${endpoint}`, {
+                const res = await fetch(`${SERVER_URL}${endpoint}`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'ngrok-skip-browser-warning': 'true' // <--- ЭТА СТРОКА РЕШАЕТ ПРОБЛЕМУ
-                    },
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ user_id: userId, ...body })
                 });
 
-                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-                return await response.json();
-            } catch (error) {
-                console.error("API Error:", error);
-                statusBar.style.display = 'block';
-                statusBar.style.background = 'red';
-                statusBar.innerText = "Connection lost. Reconnecting...";
+                // Если статус 400 - это логическая ошибка (нет денег), а не сети
+                if (res.status === 400) {
+                    const err = await res.json();
+                    tg.showAlert(err.error || "Ошибка");
+                    return null;
+                }
+
+                if (!res.ok) throw new Error("Network");
+                
+                els.errorToast.style.display = 'none';
+                return await res.json();
+
+            } catch (e) {
+                console.error(e);
+                // Показываем плашку "Connection Lost"
+                els.errorToast.style.display = 'block';
                 return null;
             }
         }
 
-        // 1. Инициализация игры
-       async function initGame() {
-            // Показываем, что начали грузиться
-            statusBar.style.display = 'block';
-            statusBar.style.background = 'blue';
-            statusBar.innerText = "Попытка соединения...";
-
-            try {
-                // Пытаемся получить данные
-                const response = await fetch(`${SERVER_URL}/api/init`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ user_id: userId })
-                });
-
-                // Если сервер ответил ошибкой (например 404 или 500)
-                if (!response.ok) {
-                    throw new Error(`Ошибка сервера: ${response.status}`);
+        // --- ИНИЦИАЛИЗАЦИЯ ---
+        async function initGame() {
+            // Передаем start_param для рефералки
+            const data = await apiRequest('/api/init', { start_param: startParam });
+            if (data) {
+                gameState = data;
+                updateUI();
+                
+                // Ежедневная награда
+                if (data.can_claim_daily) {
+                    els.dailyBtn.classList.add('active');
+                    els.dailyBtn.innerText = "🎁 ЗАБРАТЬ 50,000!";
+                } else {
+                    els.dailyBtn.classList.remove('active');
+                    els.dailyBtn.innerText = "⏳ Жди 24ч";
                 }
 
-                const data = await response.json();
-                
-                // Если всё ок
-                if (data) {
-                    gameState = data;
-                    updateUI();
-                    statusBar.style.display = 'none'; // Убираем статус
-                    if(data.profit_afk > 0) tg.showAlert(`Намайнил: ${data.profit_afk}`);
-                }
-            } catch (error) {
-                // ВОТ ТУТ МЫ УВИДИМ ОШИБКУ
-                console.error(error);
-                statusBar.style.display = 'block';
-                statusBar.style.background = 'red';
-                // Выводим текст ошибки прямо на экран
-                statusBar.innerText = "ERROR: " + error.message;
-                
-                // Дополнительно покажем Alert для надежности
-                alert("Ошибка подключения: " + error.message);
+                if (data.profit_afk > 0) tg.showAlert(`Ты спал, а Золо заработал: +${data.profit_afk}`);
             }
         }
 
-        // 2. Обработка клика (Optimistic UI)
-        tapBtn.addEventListener('click', (e) => {
+        // --- ТАП ---
+        document.getElementById('tapBtn').addEventListener('click', (e) => {
             if (gameState.energy > 0) {
-                // Мгновенно обновляем интерфейс, не ожидая сервера
                 gameState.balance += gameState.multitap;
-                gameState.energy -= 1;
+                gameState.energy--;
                 clicksQueue++;
-                
                 updateUI();
-                tg.HapticFeedback.impactOccurred('medium'); // Вибрация
                 
-                // Анимация вылетающих цифр
-                showFloatingText(e.clientX, e.clientY, `+${gameState.multitap}`);
-            } else {
-                tg.HapticFeedback.notificationOccurred('error'); // Вибрация ошибки
+                // Анимация
+                const float = document.createElement('div');
+                float.className = 'float-text';
+                float.innerText = '+' + gameState.multitap;
+                float.style.left = e.clientX + 'px';
+                float.style.top = e.clientY - 50 + 'px';
+                document.body.appendChild(float);
+                setTimeout(() => float.remove(), 800);
+                
+                tg.HapticFeedback.impactOccurred('medium');
             }
         });
 
-        // 3. Отправка кликов на сервер (каждые 1.5 сек)
+        // Отправка кликов
         setInterval(async () => {
             if (clicksQueue > 0) {
-                const toSend = clicksQueue;
-                clicksQueue = 0; // Сбрасываем очередь
-                
-                // Отправляем в фоне
+                const toSend = clicksQueue; clicksQueue = 0;
                 await apiRequest('/api/tap', { clicks: toSend });
             }
-        }, 1500);
+        }, 2000);
 
-        // 4. Покупка улучшений
-        async function buyUpgrade(type) {
-            tg.HapticFeedback.selectionChanged();
-            
-            // Спрашиваем подтверждение (опционально, можно убрать)
-            const confirm = true; 
-            
-            if (confirm) {
-                const result = await apiRequest('/api/buy', { type: type });
-                if (result && result.status === 'ok') {
-                    tg.HapticFeedback.notificationOccurred('success');
-                    initGame(); // Перезагружаем данные с сервера
-                } else {
-                    tg.HapticFeedback.notificationOccurred('error');
-                    tg.showAlert("Недостаточно денег!");
-                }
+        // --- ПОКУПКА ---
+        async function buy(type) {
+            // Сначала проверяем локально
+            let price = (type === 'multitap') ? 200 * gameState.multitap : 1000 * (gameState.mining + 1);
+            if (gameState.balance < price) {
+                tg.HapticFeedback.notificationOccurred('error');
+                tg.showAlert("Не хватает монет!"); 
+                return;
+            }
+
+            const res = await apiRequest('/api/buy', { type: type });
+            if (res && res.status === 'ok') {
+                tg.HapticFeedback.notificationOccurred('success');
+                initGame(); // Обновляем данные
             }
         }
 
-        // Вспомогательные функции
+        // --- ЕЖЕДНЕВКА ---
+        async function claimDaily() {
+            const res = await apiRequest('/api/daily');
+            if (res && res.status === 'ok') {
+                tg.HapticFeedback.notificationOccurred('success');
+                tg.showAlert("Награда получена!");
+                initGame();
+            }
+        }
+
+        // --- ДРУЗЬЯ И ТОП ---
+        function inviteFriend() {
+            // Генерируем ссылку
+            const link = `https://t.me/ТВОЙ_БОТ?start=${userId}`;
+            const text = "Заходи в Zolo Kombat, тапай и зарабатывай!";
+            const url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
+            tg.openTelegramLink(url);
+        }
+
+        async function loadLeaderboard() {
+            try {
+                const res = await fetch(`${SERVER_URL}/api/leaderboard`);
+                const users = await res.json();
+                const list = document.getElementById('leaderboard-list');
+                list.innerHTML = "";
+                users.forEach((u, i) => {
+                    list.innerHTML += `
+                        <div class="list-item">
+                            <span class="rank-num">#${i+1}</span>
+                            <span>ID: ${u.id}</span>
+                            <span style="color:gold">${u.balance.toLocaleString()}</span>
+                        </div>`;
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        // --- ИНТЕРФЕЙС ---
         function updateUI() {
-            balanceEl.innerText = Math.floor(gameState.balance).toLocaleString();
-            energyEl.innerText = Math.floor(gameState.energy);
-            multitapStat.innerText = gameState.multitap;
-            miningStat.innerText = (gameState.mining * 3600).toLocaleString();
+            els.balance.innerText = gameState.balance.toLocaleString();
+            els.energy.innerText = Math.floor(gameState.energy);
+            els.multiStat.innerText = gameState.multitap;
+            els.mineStat.innerText = (gameState.mining * 3600).toLocaleString();
             
-            const pct = Math.max(0, (gameState.energy / maxEnergy) * 100);
-            energyBar.style.width = pct + "%";
-            
-            // --- ОБНОВЛЯЕМ ЦЕНЫ НА КНОПКАХ ---
-            // Формулы должны совпадать с server.py
-            const priceMulti = 200 * gameState.multitap;
-            const priceMine = 1000 * (gameState.mining + 1);
-            
-            document.getElementById('price-multi').innerText = formatPrice(priceMulti);
-            document.getElementById('price-mine').innerText = formatPrice(priceMine);
+            const pct = (gameState.energy / 1500) * 100;
+            els.energyBar.style.width = pct + "%";
+
+            // Логика ЦВЕТНЫХ КНОПОК
+            updateBtn(els.btnMulti, 200 * gameState.multitap);
+            updateBtn(els.btnMine, 1000 * (gameState.mining + 1));
         }
 
-        // Красивое сокращение цен (1.2k)
-        function formatPrice(num) {
-            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-            if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
-            return num;
+        function updateBtn(btn, price) {
+            btn.innerText = price.toLocaleString();
+            if (gameState.balance >= price) {
+                btn.classList.add('can-buy');
+            } else {
+                btn.classList.remove('can-buy');
+            }
         }
 
-        function showFloatingText(x, y, text) {
-            const el = document.createElement('div');
-            el.className = 'floating-text';
-            el.innerText = text;
-            // Рандомный разброс, чтобы цифры не слипались
-            const randomX = (Math.random() - 0.5) * 40;
-            el.style.left = (x + randomX) + 'px';
-            el.style.top = (y - 50) + 'px';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 800);
+        function switchTab(tab, btn) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen-' + tab).classList.add('active');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            if (tab === 'social') loadLeaderboard();
         }
 
-        // Запуск!
         initGame();
         
-        // Авто-восстановление энергии (визуально)
+        // Реген энергии визуал
         setInterval(() => {
-            if (gameState.energy < maxEnergy) {
-                gameState.energy += 1; // Просто визуально, сервер сам посчитает правильно
-                updateUI();
-            }
+            if (gameState.energy < 1500) { gameState.energy++; updateUI(); }
         }, 1000);
-
     </script>
 </body>
 </html>
-
