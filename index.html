@@ -188,11 +188,11 @@
         </div>
         <div class="nav-item" onclick="buyUpgrade('mining')">
             <div class="nav-icon">⛏️</div>
-            <div>Mine (Buy)</div>
+            <div>Mine (<span id="price-mine">1000</span>)</div>
         </div>
         <div class="nav-item" onclick="buyUpgrade('multitap')">
             <div class="nav-icon">🚀</div>
-            <div>Boost (Buy)</div>
+            <div>Boost (<span id="price-multi">200</span>)</div>
         </div>
     </div>
 
@@ -340,20 +340,28 @@
 
         // Вспомогательные функции
         function updateUI() {
-            // Форматируем числа (1 000 000)
-            balanceEl.innerText = gameState.balance.toLocaleString();
-            energyEl.innerText = gameState.energy;
+            balanceEl.innerText = Math.floor(gameState.balance).toLocaleString();
+            energyEl.innerText = Math.floor(gameState.energy);
             multitapStat.innerText = gameState.multitap;
-            miningStat.innerText = (gameState.mining * 3600).toLocaleString(); // Доход в час
+            miningStat.innerText = (gameState.mining * 3600).toLocaleString();
             
-            // Обновляем полоску энергии
-            const percentage = Math.max(0, (gameState.energy / maxEnergy) * 100);
-            energyBar.style.width = percentage + "%";
+            const pct = Math.max(0, (gameState.energy / maxEnergy) * 100);
+            energyBar.style.width = pct + "%";
             
-            // Если энергии мало - красим полоску в красный
-            energyBar.style.background = percentage < 20 
-                ? 'linear-gradient(90deg, #ff4b4b, #ff7e7e)' 
-                : 'linear-gradient(90deg, #f3ba2f, #ffeb3b)';
+            // --- ОБНОВЛЯЕМ ЦЕНЫ НА КНОПКАХ ---
+            // Формулы должны совпадать с server.py
+            const priceMulti = 200 * gameState.multitap;
+            const priceMine = 1000 * (gameState.mining + 1);
+            
+            document.getElementById('price-multi').innerText = formatPrice(priceMulti);
+            document.getElementById('price-mine').innerText = formatPrice(priceMine);
+        }
+
+        // Красивое сокращение цен (1.2k)
+        function formatPrice(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+            return num;
         }
 
         function showFloatingText(x, y, text) {
@@ -382,3 +390,4 @@
     </script>
 </body>
 </html>
+
