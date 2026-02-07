@@ -3,220 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zolo Kombat RGB</title>
+    <title>Hardware Tycoon</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-grad: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            --card-bg: rgba(255, 255, 255, 0.08);
-            --accent-gold: #ffd700;
-            --accent-green: #00e676;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
+            --bg-color: #121212;
+            --card: #1e1e1e;
+            --gold: #ffcc00;
+            --green: #4cd964;
+            --blue: #007aff;
+            --red: #ff3b30;
+            --text: #ffffff;
+            --text-sub: #8e8e93;
         }
 
         body {
-            margin: 0; padding: 0;
-            background: var(--bg-grad);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite; /* Анимированный фон */
-            color: var(--text-primary);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            height: 100vh; overflow: hidden;
-            display: flex; flex-direction: column;
-            user-select: none; -webkit-tap-highlight-color: transparent;
+            margin: 0; padding: 0; background: var(--bg-color); color: var(--text);
+            font-family: -apple-system, sans-serif; height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column; user-select: none;
         }
 
-        @keyframes gradientBG { 
-            0% {background-position: 0% 50%;} 50% {background-position: 100% 50%;} 100% {background-position: 0% 50%;} 
-        }
-
-        .screen { display: none; height: 100%; flex-direction: column; padding: 20px; overflow-y: auto; box-sizing: border-box; }
+        /* Табы */
+        .screen { display: none; height: 100%; flex-direction: column; padding: 15px; overflow-y: auto; }
         .screen.active { display: flex; }
 
-        /* HEADER STATS - КРУПНЕЕ */
-        .stats-grid {
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;
-            background: var(--card-bg); padding: 15px; border-radius: 20px; margin-bottom: 25px;
-            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
+        /* HEADER */
+        .header {
+            display: flex; justify-content: space-between; padding: 10px;
+            background: var(--card); border-radius: 15px; margin-bottom: 20px;
         }
-        .stat-item { text-align: center; }
-        .stat-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
-        .stat-val { font-size: 18px; font-weight: 800; color: var(--accent-gold); margin-top: 5px; }
+        .h-item { text-align: center; width: 33%; }
+        .h-lbl { font-size: 10px; color: var(--text-sub); }
+        .h-val { font-size: 14px; font-weight: bold; }
 
-        /* BIG BALANCE */
-        .balance-container { text-align: center; margin: 10px 0 30px 0; }
-        .balance-val { font-size: 56px; font-weight: 900; text-shadow: 0 0 25px rgba(255, 215, 0, 0.5); letter-spacing: -2px; }
+        /* БАЛАНС */
+        .balance-box { text-align: center; margin-bottom: 20px; }
+        .balance-num { font-size: 42px; font-weight: 800; color: var(--gold); }
+        .balance-lbl { font-size: 12px; color: var(--text-sub); }
 
-        /* TAP AREA - ПАСХАЛКА */
+        /* ТАПАЛКА */
         .tap-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative; }
-        .tap-btn {
-            width: 290px; height: 290px;
+        .tap-img {
+            width: 260px; height: 260px;
             background-image: url('https://i.imgur.com/8QlqWkH.png');
             background-size: cover; border-radius: 50%;
-            box-shadow: 0 0 80px rgba(255, 215, 0, 0.3);
-            transition: transform 0.05s, filter 0.2s;
-            cursor: pointer; border: 6px solid rgba(255,255,255,0.15);
+            border: 5px solid rgba(255,255,255,0.1);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            transition: transform 0.05s;
         }
-        .tap-btn:active { transform: scale(0.92); }
-        .tap-btn.glitch { filter: hue-rotate(90deg) contrast(200%); } /* Эффект пасхалки */
+        .tap-img:active { transform: scale(0.95); }
 
-        /* ENERGY */
-        .energy-bar-container { height: 14px; background: rgba(0,0,0,0.4); border-radius: 7px; margin: 10px 20px; overflow: hidden; }
-        .energy-fill { height: 100%; background: linear-gradient(90deg, #ff9800, #ffeb3b); width: 100%; transition: width 0.2s; }
+        /* ЭНЕРГИЯ */
+        .energy-box { margin: 10px 20px; }
+        .e-text { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+        .e-bar { height: 12px; background: #333; border-radius: 6px; overflow: hidden; }
+        .e-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #ff9500); width: 100%; }
 
-        /* UPGRADES LIST */
-        .upgrade-item {
+        /* МАГАЗИН */
+        .shop-cat { margin-top: 20px; margin-bottom: 10px; font-size: 18px; font-weight: bold; color: var(--blue); }
+        .item {
             display: flex; justify-content: space-between; align-items: center;
-            background: var(--card-bg); padding: 18px; margin-bottom: 15px; border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(5px);
+            background: var(--card); padding: 15px; margin-bottom: 10px; border-radius: 12px;
+            border-left: 4px solid transparent;
         }
-        .upgrade-info h4 { margin: 0; font-size: 18px; color: #fff; }
-        .upgrade-info p { margin: 6px 0 0; font-size: 13px; color: var(--text-secondary); }
-        .model-name { color: var(--accent-green); font-weight: bold; font-size: 14px; }
+        .item-info h4 { margin: 0; font-size: 15px; }
+        .item-info p { margin: 4px 0 0; font-size: 11px; color: var(--text-sub); }
+        .lvl-badge { background: #333; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 5px; }
         
         .buy-btn {
-            padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 14px;
-            background: rgba(255,255,255,0.1); color: #777; border: none; cursor: default;
-            min-width: 90px; text-align: center;
+            background: #333; color: #777; border: none; padding: 10px 15px;
+            border-radius: 8px; font-weight: bold; font-size: 13px; min-width: 80px;
         }
-        .buy-btn.can-buy {
-            background: linear-gradient(135deg, var(--accent-green), #00b894);
-            color: #000; cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0, 230, 118, 0.3);
-        }
-        .buy-btn.can-buy:active { transform: scale(0.95); }
+        .buy-btn.green { background: var(--green); color: #000; cursor: pointer; }
+        .buy-btn.red { background: rgba(255, 59, 48, 0.2); color: var(--red); cursor: not-allowed; border: 1px solid var(--red); }
 
-        /* LISTS */
-        .list-item {
-            display: flex; justify-content: space-between; padding: 18px;
-            background: var(--card-bg); margin-bottom: 10px; border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.05); align-items: center;
-        }
-        .rank-num { font-weight: bold; color: var(--accent-gold); width: 30px; font-size: 18px; }
-        .user-name { font-weight: bold; color: white; font-size: 16px; }
-
-        .daily-btn {
-            width: 100%; padding: 25px; background: linear-gradient(45deg, #ff0099, #493240);
-            border: none; border-radius: 18px; color: white; font-weight: bold; font-size: 20px;
-            margin-bottom: 25px; cursor: pointer; opacity: 0.6; pointer-events: none;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3); text-transform: uppercase;
-        }
-        .daily-btn.active { 
-            opacity: 1; pointer-events: auto; 
-            background: linear-gradient(45deg, #ff00cc, #333399);
-            animation: pulse 2s infinite; 
-        }
-        @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.02);} 100% {transform: scale(1);} }
-
-        /* NAV */
-        .bottom-nav {
-            display: flex; justify-content: space-around; background: rgba(0,0,0,0.8);
-            padding: 15px 0 30px; border-top: 1px solid rgba(255,255,255,0.1);
-            backdrop-filter: blur(20px);
-        }
-        .nav-btn {
-            display: flex; flex-direction: column; align-items: center; color: var(--text-secondary);
-            font-size: 12px; cursor: pointer; transition: 0.2s; width: 33%;
-        }
-        .nav-btn.active { color: white; transform: translateY(-5px); text-shadow: 0 0 10px white; }
-        .nav-icon { font-size: 28px; margin-bottom: 6px; }
-
-        .float-text { position: absolute; color: white; font-weight: 900; font-size: 32px; animation: floatUp 0.8s forwards; pointer-events: none; text-shadow: 2px 2px 0 #000; }
-        @keyframes floatUp { to { transform: translateY(-120px) rotate(10deg); opacity: 0; } }
-
-        #error-toast {
-            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-            background: #ff4b4b; color: white; padding: 12px 25px; border-radius: 30px;
-            font-size: 14px; display: none; z-index: 100; box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-weight: bold;
-        }
+        /* ТОП */
+        .row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #333; }
         
-        h2 { font-size: 28px; margin-bottom: 20px; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        /* НАВИГАЦИЯ */
+        .nav {
+            display: flex; background: #000; padding: 15px 0 25px; border-top: 1px solid #333;
+        }
+        .nav-btn { flex: 1; text-align: center; color: #555; font-size: 10px; }
+        .nav-btn.active { color: var(--text); }
+        .nav-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+
+        .float { position: absolute; color: white; font-weight: bold; font-size: 24px; animation: up 0.8s forwards; pointer-events: none; }
+        @keyframes up { to { transform: translateY(-100px); opacity: 0; } }
     </style>
 </head>
 <body>
 
-    <div id="error-toast">📡 Connection Lost...</div>
-
-    <div id="screen-game" class="screen active">
-        <h2 style="text-align:center; font-size:14px; opacity:0.5;" id="title-header">ZOLO KOMBAT</h2>
-        <div class="stats-grid">
-            <div class="stat-item">
-                <div class="stat-label">Майнинг/час</div>
-                <div class="stat-val">+<span id="mining-stat">0</span></div>
+    <div id="tab-game" class="screen active">
+        <div class="header">
+            <div class="h-item">
+                <div class="h-lbl">БП (Ватт)</div>
+                <div class="h-val">⚡ <span id="watt-val">0</span>W</div>
             </div>
-            <div class="stat-item" id="energy-click">
-                <div class="stat-label">Энергия</div>
-                <div class="stat-val"><span id="energy">1500</span></div>
+            <div class="h-item">
+                <div class="h-lbl">Доход/сек</div>
+                <div class="h-val">💰 <span id="mine-val">0</span></div>
             </div>
-            <div class="stat-item">
-                <div class="stat-label">CPU</div>
-                <div class="stat-val"><span id="cpu-name">Pentium</span></div>
+            <div class="h-item">
+                <div class="h-lbl">Реген</div>
+                <div class="h-val">🔄 <span id="regen-val">1</span>/с</div>
             </div>
         </div>
 
-        <div class="balance-container">
-            <div class="balance-val" id="balance">0</div>
+        <div class="balance-box">
+            <div class="balance-num" id="balance">0</div>
+            <div class="balance-lbl">ZOLO COINS</div>
         </div>
 
         <div class="tap-area">
-            <div class="tap-btn" id="tapBtn"></div>
+            <div class="tap-img" id="tapBtn"></div>
         </div>
 
-        <div class="energy-bar-container">
-            <div class="energy-fill" id="energy-bar"></div>
-        </div>
-    </div>
-
-    <div id="screen-earn" class="screen">
-        <h2>🛍️ Магазин Железа</h2>
-        
-        <button id="daily-btn" class="daily-btn" onclick="claimDaily()">🎁 Забрать награду</button>
-
-        <div class="upgrade-item">
-            <div class="upgrade-info">
-                <h4>Процессор (Клик)</h4>
-                <div class="model-name" id="next-cpu">Загрузка...</div>
-                <p>Мощнее проц - сильнее клик</p>
+        <div class="energy-box">
+            <div class="e-text">
+                <span>Энергия</span>
+                <span><span id="cur-en">0</span> / <span id="max-en">1000</span></span>
             </div>
-            <button class="buy-btn" id="btn-multi" onclick="buy('multitap')">200</button>
-        </div>
-
-        <div class="upgrade-item">
-            <div class="upgrade-info">
-                <h4>Видеокарта (Майнинг)</h4>
-                <div class="model-name" id="next-gpu">Загрузка...</div>
-                <p>Майнит крипту пока ты спишь</p>
-            </div>
-            <button class="buy-btn" id="btn-mine" onclick="buy('mining')">1000</button>
+            <div class="e-bar"><div class="e-fill" id="e-bar"></div></div>
         </div>
     </div>
 
-    <div id="screen-social" class="screen">
-        <h2>💎 Твоя Банда</h2>
-        <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; margin-bottom: 30px; text-align:center;">
-            <p style="font-size:16px;">Пригласи друга и получи <b>5,000 монет</b>!</p>
-            <button class="buy-btn can-buy" style="width:100%; padding:15px; font-size:16px;" onclick="inviteFriend()">🔗 Пригласить</button>
-        </div>
-
-        <h2>🏆 Топ Магнатов</h2>
-        <div id="leaderboard-list">
-            <div style="text-align:center; color:#777">Загрузка списка...</div>
-        </div>
+    <div id="tab-shop" class="screen">
+        <h2 style="text-align:center">Магазин Железа</h2>
+        <div id="shop-list"></div>
     </div>
 
-    <div class="bottom-nav">
-        <div class="nav-btn active" onclick="switchTab('game', this)">
-            <div class="nav-icon">🎮</div>
-            <div>База</div>
+    <div id="tab-top" class="screen">
+        <h2 style="text-align:center">IT Магнаты</h2>
+        <div id="leaderboard">Загрузка...</div>
+    </div>
+
+    <div class="nav">
+        <div class="nav-btn active" onclick="go('game', this)">
+            <span class="nav-icon">🖥️</span> ПК
         </div>
-        <div class="nav-btn" onclick="switchTab('earn', this)">
-            <div class="nav-icon">🛒</div>
-            <div>Апгрейд</div>
+        <div class="nav-btn" onclick="go('shop', this)">
+            <span class="nav-icon">🛒</span> Апгрейд
         </div>
-        <div class="nav-btn" onclick="switchTab('social', this)">
-            <div class="nav-icon">🏆</div>
-            <div>Топ</div>
+        <div class="nav-btn" onclick="go('top', this)">
+            <span class="nav-icon">🏆</span> Топ
         </div>
     </div>
 
@@ -224,226 +154,267 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // ==========================================
-        // 👇 ТВОЯ ССЫЛКА 👇
-        const SERVER_URL = "https://aboba1234.pythonanywhere.com"; 
-        // ==========================================
+        // 👇 ТВОЙ URL 👇
+        const SERVER_URL = "https://ТВОЙ_НИК.pythonanywhere.com";
 
+        // --- ДАННЫЕ О КОМПЛЕКТУЮЩИХ (БАЗА ЗНАНИЙ) ---
+        
+        // 1. ПРОЦЕССОРЫ (Клик) - 50 уровней
+        const cpuList = [
+            {n:"Intel 8086", w:5}, {n:"Intel 286", w:8}, {n:"Intel 386", w:10}, {n:"Intel 486", w:15},
+            {n:"Pentium I", w:20}, {n:"Pentium MMX", w:25}, {n:"Pentium Pro", w:30}, {n:"Pentium II", w:35},
+            {n:"Celeron 300A", w:35}, {n:"Pentium III", w:40}, {n:"Athlon K7", w:50}, {n:"Pentium 4", w:80},
+            {n:"Athlon 64", w:85}, {n:"Pentium D", w:130}, {n:"Core 2 Duo", w:65}, {n:"Core 2 Quad", w:95},
+            {n:"Phenom II X4", w:125}, {n:"Core i7 920", w:130}, {n:"Core i5 2500K", w:95}, {n:"FX-8350", w:140},
+            {n:"Core i7 4790K", w:88}, {n:"Ryzen 7 1700", w:65}, {n:"Core i9 9900K", w:150}, {n:"Ryzen 9 3950X", w:160},
+            {n:"Core i9 12900K", w:240}, {n:"Ryzen 9 7950X", w:230}, {n:"Threadripper", w:350}, {n:"Epyc Rome", w:400},
+            {n:"Xeon Platinum", w:500}, {n:"Apple M1 Ultra", w:100}, {n:"Quantum Bit 1", w:600}, {n:"Quantum Bit 5", w:700},
+            {n:"Neuro Chip v1", w:800}, {n:"Neuro Chip v2", w:900}, {n:"Bio-Processor", w:1000}, {n:"Plasma Core", w:1200},
+            {n:"Photon CPU", w:1500}, {n:"Antimatter Core", w:2000}, {n:"Black Hole Chip", w:3000}, {n:"God Particle", w:5000}
+        ]; // Дополнил до 40 для примера
+
+        // 2. ВИДЕОКАРТЫ (Майнинг)
+        const gpuList = [
+            {n:"CGA Graphics", w:5}, {n:"EGA", w:10}, {n:"VGA", w:15}, {n:"S3 Trio", w:20},
+            {n:"3dfx Voodoo", w:30}, {n:"Riva TNT2", w:35}, {n:"GeForce 256", w:40}, {n:"Radeon 8500", w:45},
+            {n:"GeForce 4 Ti", w:50}, {n:"Radeon 9800 Pro", w:60}, {n:"GeForce 6800 Ultra", w:80}, {n:"GeForce 8800 GTX", w:150},
+            {n:"HD 5870", w:180}, {n:"GTX 480 (Grill)", w:300}, {n:"GTX 690", w:300}, {n:"R9 290X", w:290},
+            {n:"GTX 980 Ti", w:250}, {n:"GTX 1080 Ti", w:250}, {n:"RTX 2080 Ti", w:260}, {n:"RTX 3090", w:350},
+            {n:"RTX 4090", w:450}, {n:"RTX 5090", w:600}, {n:"H100 Cluster", w:700}, {n:"Tesla Dojo", w:1000},
+            {n:"Mining Rig v1", w:1200}, {n:"Mining Rig v2", w:1500}, {n:"AI Farm", w:2000}, {n:"Matrix Render", w:3000},
+            {n:"Simulation GPU", w:5000}
+        ];
+
+        // 3. БЛОКИ ПИТАНИЯ (Лимит Ватт)
+        const psuList = [
+            {n:"Картофелина", p:15}, {n:"Батарейка AA", p:30}, {n:"NoName 200W", p:200}, {n:"Office 300W", p:300},
+            {n:"Bronze 450W", p:450}, {n:"Silver 600W", p:600}, {n:"Gold 750W", p:750}, {n:"Platinum 1000W", p:1000},
+            {n:"Titanium 1600W", p:1600}, {n:"Server PSU 2kW", p:2000}, {n:"Industrial 5kW", p:5000}, {n:"Substation", p:10000},
+            {n:"Nuclear Reactor", p:50000}, {n:"Dyson Sphere", p:999999}
+        ];
+
+        // 4. ОЗУ (Реген энергии)
+        const ramList = [
+            {n:"DIP Switch", spd:"+0.5"}, {n:"SIP Memory", spd:"+1"}, {n:"SIMM 30-pin", spd:"+1.5"}, {n:"SIMM 72-pin", spd:"+2"},
+            {n:"DIMM SDRAM", spd:"+3"}, {n:"DDR1 266", spd:"+4"}, {n:"DDR2 800", spd:"+5"}, {n:"DDR3 1600", spd:"+7"},
+            {n:"DDR4 3200", spd:"+10"}, {n:"DDR5 6000", spd:"+15"}, {n:"HBM2", spd:"+20"}, {n:"HBM3e", spd:"+30"},
+            {n:"Crystalline", spd:"+50"}, {n:"DNA Storage", spd:"+100"}
+        ];
+
+        // --- ЛОГИКА ---
         const user = tg.initDataUnsafe.user;
-        const userId = user ? user.id : 12345;
-        const username = user ? (user.username ? `@${user.username}` : user.first_name) : "Gamer";
+        const userId = user ? user.id : 123;
+        // БЕРЕМ ПОЛНОЕ ИМЯ
+        const fullName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : "Unknown User";
         const startParam = tg.initDataUnsafe.start_param || null;
 
-        let gameState = { balance: 0, energy: 1500, multitap: 1, mining: 0, daily_amount: 5000 };
-        let clicksQueue = 0;
-        let failCount = 0; // Для защиты от Connection Lost
+        let state = { bal:0, en:1000, maxEn:1000, multi:1, mine:0, ram:1, psu:1 };
+        let clicks = 0;
+        let failCount = 0;
 
-        // --- ЛОР ИГРЫ (НАЗВАНИЯ) ---
-        const cpuNames = ["Pentium 2", "Celeron", "Core 2 Duo", "Core i3", "Core i5", "Core i7", "Core i9", "Ryzen 9", "Threadripper", "Quantum CPU", "Alien Tech"];
-        const gpuNames = ["Integrated", "Riva TNT", "GeForce 256", "MX 440", "GT 9800", "GTX 660", "GTX 1080", "RTX 3060", "RTX 4090", "H100 Cluster", "Dyson Sphere"];
-
-        const els = {
-            balance: document.getElementById('balance'),
-            energy: document.getElementById('energy'),
-            energyBar: document.getElementById('energy-bar'),
-            cpuName: document.getElementById('cpu-name'),
-            mineStat: document.getElementById('mining-stat'),
-            btnMulti: document.getElementById('btn-multi'),
-            btnMine: document.getElementById('btn-mine'),
-            nextCpu: document.getElementById('next-cpu'),
-            nextGpu: document.getElementById('next-gpu'),
-            dailyBtn: document.getElementById('daily-btn'),
-            errorToast: document.getElementById('error-toast')
-        };
-
-        async function apiRequest(endpoint, body = {}) {
+        async function req(ep, body={}) {
             try {
-                const res = await fetch(`${SERVER_URL}${endpoint}`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ user_id: userId, ...body })
+                const r = await fetch(SERVER_URL + ep, {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({user_id:userId, username:fullName, ...body})
                 });
-
-                if (res.status === 400) {
-                    const err = await res.json();
-                    tg.showAlert(err.error || "Ошибка");
-                    return null;
-                }
-                if (!res.ok) throw new Error("Network");
-                
-                // Успех - сбрасываем счетчик ошибок
-                failCount = 0;
-                els.errorToast.style.display = 'none';
-                return await res.json();
-
-            } catch (e) {
-                console.error(e);
+                if(r.status===400) { tg.showAlert((await r.json()).error); return null; }
+                failCount=0;
+                return await r.json();
+            } catch(e) {
                 failCount++;
-                // ПОКАЗЫВАЕМ ОШИБКУ ТОЛЬКО ПОСЛЕ 3 НЕУДАЧ (debounce)
-                if (failCount > 3) {
-                    els.errorToast.style.display = 'block';
-                }
+                if(failCount>3) tg.showAlert("Связь потеряна...");
                 return null;
             }
         }
 
-        async function initGame() {
-            const data = await apiRequest('/api/init', { username: username, start_param: startParam });
-            if (data) {
-                gameState = data;
-                updateUI();
-                
-                if (data.can_claim_daily) {
-                    els.dailyBtn.classList.add('active');
-                    els.dailyBtn.innerText = `🎁 ЗАБРАТЬ +${formatNum(data.daily_amount)}`;
-                } else {
-                    els.dailyBtn.classList.remove('active');
-                    els.dailyBtn.innerText = "⏳ Жди 24ч";
-                }
-                if (data.profit_afk > 0) tg.showAlert(`Пока ты спал, ферма намайнила: +${formatNum(data.profit_afk)}`);
+        async function init() {
+            const d = await req('/api/init', {start_param:startParam});
+            if(d) {
+                state = {
+                    bal: d.balance, en: d.energy, maxEn: d.max_energy,
+                    multi: d.multitap, mine: d.mining, ram: d.ram, psu: d.psu
+                };
+                render();
+                renderShop();
+                if(d.profit_afk > 0) tg.showAlert(`Майнинг оффлайн: +${d.profit_afk}`);
             }
         }
 
+        // --- UI RENDER ---
+        function render() {
+            document.getElementById('balance').innerText = Math.floor(state.bal).toLocaleString();
+            document.getElementById('cur-en').innerText = Math.floor(state.en);
+            document.getElementById('max-en').innerText = state.maxEn;
+            document.getElementById('e-bar').style.width = (state.en / state.maxEn * 100) + "%";
+            
+            // Расчет потребления ватт
+            const curCpuW = cpuList[state.multi-1]?.w || 0;
+            const curGpuW = gpuList[state.mine]?.w || 0; // mine=0 means no gpu usually
+            const usedW = curCpuW + curGpuW;
+            const maxW = psuList[state.psu-1]?.p || 15;
+            
+            document.getElementById('watt-val').innerText = `${usedW} / ${maxW}`;
+            document.getElementById('watt-val').style.color = (usedW > maxW) ? '#ff3b30' : '#4cd964';
+            
+            document.getElementById('mine-val').innerText = (state.mine * 5).toLocaleString(); // условно
+            document.getElementById('regen-val').innerText = (1 + state.ram*0.5).toFixed(1);
+        }
+
+        function renderShop() {
+            const list = document.getElementById('shop-list');
+            list.innerHTML = "";
+
+            // 1. БАТАРЕЯ
+            const enPrice = Math.floor(500 * (state.maxEn/500));
+            addShopItem(list, "🔋 Аккумулятор", "Увеличить макс. энергию +500", `Текущая: ${state.maxEn}`, enPrice, 'energy');
+
+            // 2. PSU
+            const nextPsuIdx = state.psu;
+            if(nextPsuIdx < psuList.length) {
+                const p = psuList[nextPsuIdx];
+                const price = 500 * (nextPsuIdx+1);
+                addShopItem(list, "⚡ Блок питания", `${p.n} (${p.p}W)`, `Ур. ${state.psu}`, price, 'psu');
+            }
+
+            // 3. RAM
+            const nextRamIdx = state.ram;
+            if(nextRamIdx < ramList.length) {
+                const r = ramList[nextRamIdx];
+                const price = 400 * nextRamIdx;
+                addShopItem(list, "💾 ОЗУ (Реген)", `${r.n} (Скорость ${r.spd})`, `Ур. ${state.ram}`, price, 'ram');
+            }
+
+            // 4. CPU
+            const nextCpuIdx = state.multi;
+            if(nextCpuIdx < cpuList.length) {
+                const c = cpuList[nextCpuIdx];
+                const price = 200 * Math.pow(1.2, nextCpuIdx);
+                const psuCap = psuList[state.psu-1].p;
+                const currentLoad = (gpuList[state.mine]?.w || 0) + (cpuList[state.multi-1]?.w || 0);
+                const neededW = (c.w - (cpuList[state.multi-1]?.w || 0)) + currentLoad; // Прогноз
+                
+                // Простая проверка: Хватает ли БП на НОВЫЙ проц + СТАРУЮ видюху
+                const totalNeed = c.w + (gpuList[state.mine]?.w || 0);
+                const psuOk = totalNeed <= psuCap;
+
+                addShopItem(list, "🖥️ Процессор", `${c.n} (+Клик, ${c.w}W)`, `Ур. ${state.multi}`, Math.floor(price), 'multitap', psuOk);
+            }
+
+            // 5. GPU
+            const nextGpuIdx = state.mine + 1; // У нас mining_level 0 = нет карты
+            if(nextGpuIdx < gpuList.length) {
+                const g = gpuList[nextGpuIdx];
+                const price = 1000 * Math.pow(1.3, nextGpuIdx);
+                
+                const psuCap = psuList[state.psu-1].p;
+                const totalNeed = g.w + (cpuList[state.multi-1]?.w || 0);
+                const psuOk = totalNeed <= psuCap;
+
+                addShopItem(list, "🎮 Видеокарта", `${g.n} (+Доход, ${g.w}W)`, `Ур. ${state.mine}`, Math.floor(price), 'mining', psuOk);
+            }
+        }
+
+        function addShopItem(container, title, desc, badge, price, type, psuOk = true) {
+            const div = document.createElement('div');
+            div.className = 'item';
+            
+            // Если БП не хватает
+            let btnClass = 'buy-btn green';
+            let btnText = price.toLocaleString();
+            let onclick = `buy('${type}', ${price})`;
+
+            if (!psuOk) {
+                btnClass = 'buy-btn red';
+                btnText = "Нужен БП!";
+                onclick = "";
+            } else if (state.bal < price) {
+                btnClass = 'buy-btn'; // серый
+                onclick = `tg.showAlert('Нет денег!')`;
+            }
+
+            div.innerHTML = `
+                <div class="item-info">
+                    <h4>${title} <span class="lvl-badge">${badge}</span></h4>
+                    <p>${desc}</p>
+                </div>
+                <button class="${btnClass}" onclick="${onclick}">${btnText}</button>
+            `;
+            container.appendChild(div);
+        }
+
+        async function buy(type, price) {
+            if(state.bal < price) return;
+            const res = await req('/api/buy', {type:type, price:price});
+            if(res && res.status==='ok') init();
+        }
+
+        // --- ГЕЙМПЛЕЙ ---
         document.getElementById('tapBtn').addEventListener('click', (e) => {
-            if (gameState.energy > 0) {
-                gameState.balance += gameState.multitap;
-                gameState.energy--;
-                clicksQueue++;
-                updateUI();
+            // Энергия тратится = Уровню клика (Сила клика)
+            const cost = state.multi;
+            
+            if(state.en >= cost) {
+                state.bal += state.multi;
+                state.en -= cost;
+                clicks++;
+                render();
                 
-                const float = document.createElement('div');
-                float.className = 'float-text';
-                float.innerText = '+' + gameState.multitap;
-                float.style.left = e.clientX + 'px';
-                float.style.top = e.clientY - 50 + 'px';
-                document.body.appendChild(float);
-                setTimeout(() => float.remove(), 800);
+                // Анимация
+                const f = document.createElement('div');
+                f.className='float'; f.innerText='+'+state.multi;
+                f.style.left = e.clientX+'px'; f.style.top = e.clientY-50+'px';
+                document.body.appendChild(f);
+                setTimeout(()=>f.remove(),800);
                 
-                tg.HapticFeedback.impactOccurred('medium');
-            }
-        });
-
-        // ПАСХАЛКА 1: Клик по заголовку
-        let titleClicks = 0;
-        document.getElementById('title-header').addEventListener('click', () => {
-            titleClicks++;
-            if (titleClicks === 5) {
-                tg.showAlert("Режим разработчика: АКТИВИРОВАН (Шутка)");
-                document.getElementById('tapBtn').classList.add('glitch');
-            }
-        });
-
-        // СИНХРОНИЗАЦИЯ МАЙНИНГА В РЕАЛЬНОМ ВРЕМЕНИ
-        setInterval(() => {
-            if (gameState.mining > 0) {
-                // Добавляем доход в секунду
-                gameState.balance += gameState.mining;
-                updateUI();
-            }
-        }, 1000);
-
-        setInterval(async () => {
-            if (clicksQueue > 0) {
-                const toSend = clicksQueue; clicksQueue = 0;
-                await apiRequest('/api/tap', { clicks: toSend });
-            }
-        }, 3000); // Реже отправляем, чтобы не грузить сеть
-
-        async function buy(type) {
-            let price = (type === 'multitap') ? 200 * gameState.multitap : 1000 * (gameState.mining + 1);
-            if (gameState.balance < price) {
-                tg.HapticFeedback.notificationOccurred('error');
-                tg.showAlert("Нужно больше золота!"); 
-                return;
-            }
-            const res = await apiRequest('/api/buy', { type: type });
-            if (res && res.status === 'ok') {
-                tg.HapticFeedback.notificationOccurred('success');
-                initGame(); 
-            }
-        }
-
-        async function claimDaily() {
-            const res = await apiRequest('/api/daily');
-            if (res && res.status === 'ok') {
-                tg.HapticFeedback.notificationOccurred('success');
-                tg.showAlert(`Получено: ${formatNum(res.reward)} монет!`);
-                initGame();
-            }
-        }
-
-        function inviteFriend() {
-            const link = `https://t.me/SuperZoloBot?start=${userId}`;
-            const text = `Я собрал ПК на RTX 4090 в Zolo Kombat! Залетай 👇`;
-            const url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
-            tg.openTelegramLink(url);
-        }
-
-        async function loadLeaderboard() {
-            try {
-                const res = await fetch(`${SERVER_URL}/api/leaderboard`);
-                const users = await res.json();
-                const list = document.getElementById('leaderboard-list');
-                list.innerHTML = "";
-                users.forEach((u, i) => {
-                    let medal = i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : `#${i+1}`));
-                    list.innerHTML += `
-                        <div class="list-item">
-                            <span class="rank-num">${medal}</span>
-                            <span class="user-name">${u.name || 'Аноним'}</span>
-                            <span style="color:gold; font-weight:bold;">${formatNum(u.balance)}</span>
-                        </div>`;
-                });
-            } catch (e) { console.error(e); }
-        }
-
-        function updateUI() {
-            els.balance.innerText = Math.floor(gameState.balance).toLocaleString();
-            els.energy.innerText = Math.floor(gameState.energy);
-            
-            // Названия железа
-            els.cpuName.innerText = cpuNames[gameState.multitap - 1] || "Alien Tech";
-            els.nextCpu.innerText = "Апгрейд до: " + (cpuNames[gameState.multitap] || "MAX");
-            
-            els.nextGpu.innerText = "Купить: " + (gpuNames[gameState.mining + 1] || "MAX");
-
-            els.mineStat.innerText = formatNum(gameState.mining * 3600);
-            
-            const pct = (gameState.energy / 1500) * 100;
-            els.energyBar.style.width = pct + "%";
-
-            updateBtn(els.btnMulti, 200 * gameState.multitap);
-            updateBtn(els.btnMine, 1000 * (gameState.mining + 1));
-        }
-
-        function updateBtn(btn, price) {
-            btn.innerText = formatNum(price);
-            if (gameState.balance >= price) {
-                btn.classList.add('can-buy');
+                tg.HapticFeedback.impactOccurred('light');
             } else {
-                btn.classList.remove('can-buy');
+                tg.HapticFeedback.notificationOccurred('error');
             }
+        });
+
+        // Отправка
+        setInterval(async()=>{
+            if(clicks>0) {
+                await req('/api/tap', {clicks:clicks});
+                clicks=0;
+            }
+        }, 2000);
+
+        // Реген энергии + Пассивный доход (Визуально)
+        setInterval(()=>{
+            // Реген: 1 + 0.5 за уровень ОЗУ
+            const regen = 1 + (state.ram * 0.5);
+            if(state.en < state.maxEn) {
+                state.en = Math.min(state.maxEn, state.en + regen);
+            }
+            // Доход: 1 ур майнинга = ~5 монет/сек (примерно)
+            if(state.mine > 0) {
+                state.bal += (state.mine * 0.2); // визуальное плавное начисление
+            }
+            render();
+        }, 200); // 5 раз в секунду для плавности
+
+        // Топ
+        async function loadTop() {
+            const d = await req('/api/leaderboard');
+            const el = document.getElementById('leaderboard');
+            el.innerHTML = "";
+            d.forEach((u,i) => {
+                el.innerHTML += `<div class="row"><b>#${i+1} ${u.name}</b> <span>${u.balance.toLocaleString()}</span></div>`;
+            });
         }
 
-        function formatNum(num) {
-            if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
-            if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
-            return num;
-        }
-
-        function switchTab(tab, btn) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('screen-' + tab).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        function go(tab, btn) {
+            document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+            document.getElementById('tab-'+tab).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
             btn.classList.add('active');
-            if (tab === 'social') loadLeaderboard();
+            if(tab==='top') loadTop();
+            if(tab==='shop') renderShop(); // Перерисовать магазин (обновить цены/доступность)
         }
 
-        initGame();
-        
-        setInterval(() => {
-            if (gameState.energy < 1500) { gameState.energy++; updateUI(); }
-        }, 1000);
+        init();
     </script>
 </body>
 </html>
