@@ -7,11 +7,12 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #1c1f24; /* Темный фон как в оригинале */
+            --bg-color: #1c1f24;
             --card-bg: #2b2f36;
             --accent-gold: #f3ba2f;
             --text-primary: #ffffff;
             --text-secondary: #8b939e;
+            --danger: #ff4b4b;
         }
 
         body {
@@ -28,110 +29,132 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Верхняя статистика */
+        /* --- Верхняя статистика --- */
         .header-stats {
             display: flex;
             justify-content: space-between;
-            padding: 20px;
+            padding: 15px 20px;
             background: var(--card-bg);
             border-bottom-left-radius: 20px;
             border-bottom-right-radius: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
         }
 
-        .stat-box {
-            text-align: center;
-        }
-        .stat-label { font-size: 12px; color: var(--text-secondary); }
-        .stat-value { font-size: 18px; font-weight: bold; color: var(--accent-gold); }
+        .stat-box { text-align: center; }
+        .stat-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-size: 16px; font-weight: bold; color: var(--accent-gold); margin-top: 4px; }
 
-        /* Главный баланс */
+        /* --- Баланс --- */
         .main-balance {
+            flex-grow: 0;
             text-align: center;
-            margin-top: 30px;
-            font-size: 48px;
+            margin: 10px 0;
+            font-size: 42px;
             font-weight: 800;
             display: flex;
             align-items: center;
             justify-content: center;
+            text-shadow: 0 0 20px rgba(243, 186, 47, 0.3);
         }
-        .coin-icon-small { width: 40px; height: 40px; margin-right: 10px; background: gold; border-radius: 50%; }
+        .coin-icon-small { 
+            width: 36px; height: 36px; margin-right: 10px; 
+            background: radial-gradient(circle, #ffd700, #f3ba2f);
+            border-radius: 50%; border: 2px solid #fff;
+            box-shadow: 0 0 10px #f3ba2f;
+        }
 
-        /* Область тапа с Иваном Золо */
+        /* --- Зона тапа (Иван Золо) --- */
         .tap-area-container {
             flex-grow: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
+            z-index: 10;
         }
 
         .tap-img {
-            width: 280px;
-            height: 280px;
-            /* ЗАМЕНИ ЭТУ ССЫЛКУ НА СВОЙ ФАЙЛ zolo.png */
+            width: 260px;
+            height: 260px;
+            /* Ссылка на картинку. Если есть своя - замени на 'zolo.png' */
             background-image: url('https://imgur.com/a/mxuPXvg'); 
             background-size: cover;
             background-position: center;
             border-radius: 50%;
-            box-shadow: 0 0 50px rgba(243, 186, 47, 0.4);
+            box-shadow: 0 0 60px rgba(243, 186, 47, 0.2);
             cursor: pointer;
-            transition: transform 0.1s ease;
-            image-rendering: pixelated; /* Чтобы пиксели были четкими */
+            transition: transform 0.05s ease;
+            image-rendering: pixelated; /* Пиксельный стиль */
+            border: 4px solid rgba(255, 255, 255, 0.1);
         }
-        .tap-img:active { transform: scale(0.95); }
+        .tap-img:active { transform: scale(0.92); }
 
-        /* Энергия */
-        .energy-container {
-            padding: 0 20px;
-            margin-bottom: 20px;
-        }
-        .energy-text { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
-        .progress-bar-bg { height: 10px; background: #3b4049; border-radius: 5px; overflow: hidden; }
-        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent-gold), #ffeb3b); width: 100%; transition: width 0.3s; }
+        /* --- Энергия --- */
+        .energy-container { padding: 0 20px; margin-bottom: 15px; }
+        .energy-text { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; font-weight: 600;}
+        .progress-bar-bg { height: 12px; background: #3b4049; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #f3ba2f, #ffeb3b); width: 100%; transition: width 0.2s ease-out; }
 
-        /* Нижнее меню */
+        /* --- Нижнее меню --- */
         .bottom-nav {
             display: flex;
             justify-content: space-around;
-            background: var(--card-bg);
-            padding: 15px 0 25px 0; /* Снизу больше места для iPhone */
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
+            background: rgba(43, 47, 54, 0.95);
+            padding: 12px 0 20px 0;
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.05);
         }
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
             color: var(--text-secondary);
-            font-size: 10px;
+            font-size: 11px;
             cursor: pointer;
+            width: 33%;
+            transition: transform 0.1s;
         }
-        .nav-item.active { color: var(--accent-gold); }
-        .nav-icon { font-size: 24px; margin-bottom: 5px; }
+        .nav-item:active { transform: scale(0.9); }
+        .nav-icon { font-size: 22px; margin-bottom: 4px; filter: grayscale(100%); transition: filter 0.3s; }
+        .nav-item.active .nav-icon { filter: grayscale(0%); }
+        .nav-item.active { color: var(--text-primary); }
 
-        /* Анимация вылетающих цифр */
+        /* --- Анимации и эффекты --- */
         .floating-text {
             position: absolute;
-            font-size: 28px;
-            font-weight: bold;
+            font-size: 32px;
+            font-weight: 900;
             color: white;
             pointer-events: none;
             animation: floatUp 0.8s ease-out forwards;
-            text-shadow: 0 0 5px black;
+            text-shadow: 2px 2px 0px #000;
+            z-index: 20;
         }
         @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-100px); }
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-120px) scale(1.2); }
+        }
+
+        #status-bar {
+            position: absolute; top: 0; left: 0; width: 100%;
+            text-align: center; font-size: 10px; padding: 2px;
+            background: rgba(0,0,0,0.5); display: none;
         }
     </style>
 </head>
 <body>
 
+    <div id="status-bar">Connecting...</div>
+
     <div class="header-stats">
         <div class="stat-box">
-            <div class="stat-label">Прибыль в час</div>
+            <div class="stat-label">Доход в час</div>
             <div class="stat-value">+<span id="mining-stat">0</span></div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Уровень</div>
+            <div class="stat-value">LVL <span id="level-stat">1</span></div>
         </div>
         <div class="stat-box">
             <div class="stat-label">Сила клика</div>
@@ -150,8 +173,8 @@
 
     <div class="energy-container">
         <div class="energy-text">
-            <span>⚡ Энергия</span>
-            <span><span id="energy">1500</span> / 1500</span>
+            <span>⚡ Energy</span>
+            <span><span id="energy">1500</span> / <span id="max-energy">1500</span></span>
         </div>
         <div class="progress-bar-bg">
             <div class="progress-bar-fill" id="energy-bar"></div>
@@ -175,19 +198,23 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); tg.enableClosingConfirmation();
+        tg.expand(); 
+        tg.enableClosingConfirmation();
 
-        // --- ВАЖНО: СЮДА ВСТАВИШЬ ССЫЛКУ ОТ NGROK ---
+        // =================================================================
+        // 👇 ВСТАВЬ СЮДА СВОЮ ССЫЛКУ ОТ NGROK (https://....ngrok-free.app)
         const SERVER_URL = "https://autumn-saltatory-overmorally.ngrok-free.dev"; 
-        // -------------------------------------------
+        // 👆 ОБЯЗАТЕЛЬНО ПРОВЕРЬ, ЧТОБЫ В КОНЦЕ НЕ БЫЛО СЛЕША "/"
+        // =================================================================
 
-        // Имитация ID для тестов в браузере
         const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 99999;
+        const statusBar = document.getElementById('status-bar');
 
         let gameState = { balance: 0, energy: 1500, multitap: 1, mining: 0 };
         let clicksQueue = 0;
         const maxEnergy = 1500;
 
+        // Элементы UI
         const balanceEl = document.getElementById('balance');
         const energyEl = document.getElementById('energy');
         const energyBar = document.getElementById('energy-bar');
@@ -196,79 +223,134 @@
         const tapBtn = document.getElementById('tapBtn');
         const tapContainer = document.querySelector('.tap-area-container');
 
-        // 1. Инициализация
-        async function initGame() {
+        // --- Функция для отправки запросов (с защитой от ngrok) ---
+        async function apiRequest(endpoint, body = {}) {
             try {
-                let res = await fetch(`${SERVER_URL}/api/init`, {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({user_id: userId})
+                const response = await fetch(`${SERVER_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true' // <--- ЭТА СТРОКА РЕШАЕТ ПРОБЛЕМУ
+                    },
+                    body: JSON.stringify({ user_id: userId, ...body })
                 });
-                let data = await res.json();
-                gameState = data;
-                updateUI();
-                if(data.profit_afk > 0) tg.showAlert(`Пока тебя не было, Золо намайнил: ${data.profit_afk} монет!`);
-            } catch (e) { balanceEl.innerText = "Error connecting!"; }
+
+                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.error("API Error:", error);
+                statusBar.style.display = 'block';
+                statusBar.style.background = 'red';
+                statusBar.innerText = "Connection lost. Reconnecting...";
+                return null;
+            }
         }
 
-        // 2. Тап и Анимация
+        // 1. Инициализация игры
+        async function initGame() {
+            const data = await apiRequest('/api/init');
+            if (data) {
+                gameState = data;
+                updateUI();
+                statusBar.style.display = 'none'; // Скрываем ошибку, если она была
+                
+                if(data.profit_afk > 0) {
+                    tg.showAlert(`Пока тебя не было, Золо намайнил: ${data.profit_afk} монет!`);
+                }
+            } else {
+                balanceEl.innerText = "Error";
+            }
+        }
+
+        // 2. Обработка клика (Optimistic UI)
         tapBtn.addEventListener('click', (e) => {
             if (gameState.energy > 0) {
-                // Визуальное обновление
+                // Мгновенно обновляем интерфейс, не ожидая сервера
                 gameState.balance += gameState.multitap;
-                gameState.energy--;
+                gameState.energy -= 1;
                 clicksQueue++;
+                
                 updateUI();
+                tg.HapticFeedback.impactOccurred('medium'); // Вибрация
                 
-                // Вибрация
-                tg.HapticFeedback.impactOccurred('medium');
-                
-                // Анимация +1
+                // Анимация вылетающих цифр
                 showFloatingText(e.clientX, e.clientY, `+${gameState.multitap}`);
+            } else {
+                tg.HapticFeedback.notificationOccurred('error'); // Вибрация ошибки
             }
         });
+
+        // 3. Отправка кликов на сервер (каждые 1.5 сек)
+        setInterval(async () => {
+            if (clicksQueue > 0) {
+                const toSend = clicksQueue;
+                clicksQueue = 0; // Сбрасываем очередь
+                
+                // Отправляем в фоне
+                await apiRequest('/api/tap', { clicks: toSend });
+            }
+        }, 1500);
+
+        // 4. Покупка улучшений
+        async function buyUpgrade(type) {
+            tg.HapticFeedback.selectionChanged();
+            
+            // Спрашиваем подтверждение (опционально, можно убрать)
+            const confirm = true; 
+            
+            if (confirm) {
+                const result = await apiRequest('/api/buy', { type: type });
+                if (result && result.status === 'ok') {
+                    tg.HapticFeedback.notificationOccurred('success');
+                    initGame(); // Перезагружаем данные с сервера
+                } else {
+                    tg.HapticFeedback.notificationOccurred('error');
+                    tg.showAlert("Недостаточно денег!");
+                }
+            }
+        }
+
+        // Вспомогательные функции
+        function updateUI() {
+            // Форматируем числа (1 000 000)
+            balanceEl.innerText = gameState.balance.toLocaleString();
+            energyEl.innerText = gameState.energy;
+            multitapStat.innerText = gameState.multitap;
+            miningStat.innerText = (gameState.mining * 3600).toLocaleString(); // Доход в час
+            
+            // Обновляем полоску энергии
+            const percentage = Math.max(0, (gameState.energy / maxEnergy) * 100);
+            energyBar.style.width = percentage + "%";
+            
+            // Если энергии мало - красим полоску в красный
+            energyBar.style.background = percentage < 20 
+                ? 'linear-gradient(90deg, #ff4b4b, #ff7e7e)' 
+                : 'linear-gradient(90deg, #f3ba2f, #ffeb3b)';
+        }
 
         function showFloatingText(x, y, text) {
             const el = document.createElement('div');
             el.className = 'floating-text';
             el.innerText = text;
-            // Небольшой рандом в позиции, чтобы цифры не накладывались
-            el.style.left = (x - 20 + Math.random()*40) + 'px';
+            // Рандомный разброс, чтобы цифры не слипались
+            const randomX = (Math.random() - 0.5) * 40;
+            el.style.left = (x + randomX) + 'px';
             el.style.top = (y - 50) + 'px';
-            tapContainer.appendChild(el);
-            setTimeout(() => el.remove(), 8000);
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 800);
         }
 
-        function updateUI() {
-            balanceEl.innerText = gameState.balance.toLocaleString();
-            energyEl.innerText = gameState.energy;
-            multitapStat.innerText = gameState.multitap;
-            # miningStat.innerText = (gameState.mining * 3600).toLocaleString(); // Прибыль в час
-            energyBar.style.width = (gameState.energy / maxEnergy * 100) + "%";
-        }
-
-        // 3. Отправка кликов на сервер (каждые 1.5 сек)
-        setInterval(async () => {
-            if (clicksQueue > 0) {
-                let toSend = clicksQueue; clicksQueue = 0;
-                await fetch(`${SERVER_URL}/api/tap`, {
-                    method: 'POST', headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({user_id: userId, clicks: toSend})
-                });
-            }
-        }, 1500);
-
-        // 4. Покупка
-        async function buyUpgrade(type) {
-            tg.HapticFeedback.notificationOccurred('success');
-            await fetch(`${SERVER_URL}/api/buy?type=${type}`, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({user_id: userId})
-            });
-            initGame(); // Обновляем данные с сервера
-        }
-
+        // Запуск!
         initGame();
+        
+        // Авто-восстановление энергии (визуально)
+        setInterval(() => {
+            if (gameState.energy < maxEnergy) {
+                gameState.energy += 1; // Просто визуально, сервер сам посчитает правильно
+                updateUI();
+            }
+        }, 1000);
+
     </script>
 </body>
 </html>
-
