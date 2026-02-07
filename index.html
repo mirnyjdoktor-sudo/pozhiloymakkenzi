@@ -3,143 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zolo Kombat 2.0</title>
+    <title>Zolo Kombat RGB</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #0d1117;
-            --card-bg: #161b22;
+            --bg-grad: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            --card-bg: rgba(255, 255, 255, 0.08);
             --accent-gold: #ffd700;
-            --accent-green: #2ea043;
-            --accent-blue: #1f6feb;
-            --text-primary: #f0f6fc;
-            --text-secondary: #8b949e;
+            --accent-green: #00e676;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
         }
 
         body {
             margin: 0; padding: 0;
-            background-color: var(--bg-color);
+            background: var(--bg-grad);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite; /* Анимированный фон */
             color: var(--text-primary);
-            font-family: -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            user-select: none;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column;
+            user-select: none; -webkit-tap-highlight-color: transparent;
         }
 
-        /* Экраны (Вкладки) */
-        .screen { display: none; height: 100%; flex-direction: column; padding: 15px; overflow-y: auto; }
+        @keyframes gradientBG { 
+            0% {background-position: 0% 50%;} 50% {background-position: 100% 50%;} 100% {background-position: 0% 50%;} 
+        }
+
+        .screen { display: none; height: 100%; flex-direction: column; padding: 20px; overflow-y: auto; box-sizing: border-box; }
         .screen.active { display: flex; }
 
-        /* HEADER STATS */
+        /* HEADER STATS - КРУПНЕЕ */
         .stats-grid {
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
-            background: var(--card-bg); padding: 15px; border-radius: 15px; margin-bottom: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;
+            background: var(--card-bg); padding: 15px; border-radius: 20px; margin-bottom: 25px;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);
         }
         .stat-item { text-align: center; }
-        .stat-label { font-size: 10px; color: var(--text-secondary); text-transform: uppercase; }
-        .stat-val { font-size: 14px; font-weight: bold; color: var(--accent-gold); }
+        .stat-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-val { font-size: 18px; font-weight: 800; color: var(--accent-gold); margin-top: 5px; }
 
         /* BIG BALANCE */
-        .balance-container { text-align: center; margin: 20px 0; }
-        .balance-val { font-size: 48px; font-weight: 800; text-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+        .balance-container { text-align: center; margin: 10px 0 30px 0; }
+        .balance-val { font-size: 56px; font-weight: 900; text-shadow: 0 0 25px rgba(255, 215, 0, 0.5); letter-spacing: -2px; }
 
-        /* TAP AREA */
+        /* TAP AREA - ПАСХАЛКА */
         .tap-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative; }
         .tap-btn {
-            width: 260px; height: 260px;
-            background-image: url('https://imgur.com/a/ReGSIoj');
+            width: 290px; height: 290px;
+            background-image: url('https://i.imgur.com/8QlqWkH.png');
             background-size: cover; border-radius: 50%;
-            box-shadow: 0 0 50px rgba(255, 215, 0, 0.2);
-            transition: transform 0.05s;
-            cursor: pointer; border: 5px solid rgba(255,255,255,0.1);
+            box-shadow: 0 0 80px rgba(255, 215, 0, 0.3);
+            transition: transform 0.05s, filter 0.2s;
+            cursor: pointer; border: 6px solid rgba(255,255,255,0.15);
         }
-        .tap-btn:active { transform: scale(0.95); }
+        .tap-btn:active { transform: scale(0.92); }
+        .tap-btn.glitch { filter: hue-rotate(90deg) contrast(200%); } /* Эффект пасхалки */
 
         /* ENERGY */
-        .energy-bar-container { height: 10px; background: #333; border-radius: 5px; margin: 10px 20px; overflow: hidden; }
-        .energy-fill { height: 100%; background: linear-gradient(90deg, #f39c12, #f1c40f); width: 100%; transition: width 0.2s; }
+        .energy-bar-container { height: 14px; background: rgba(0,0,0,0.4); border-radius: 7px; margin: 10px 20px; overflow: hidden; }
+        .energy-fill { height: 100%; background: linear-gradient(90deg, #ff9800, #ffeb3b); width: 100%; transition: width 0.2s; }
 
         /* UPGRADES LIST */
         .upgrade-item {
             display: flex; justify-content: space-between; align-items: center;
-            background: var(--card-bg); padding: 15px; margin-bottom: 10px; border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.05); transition: 0.2s;
+            background: var(--card-bg); padding: 18px; margin-bottom: 15px; border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(5px);
         }
-        .upgrade-info h4 { margin: 0; font-size: 16px; }
-        .upgrade-info p { margin: 5px 0 0; font-size: 12px; color: var(--text-secondary); }
+        .upgrade-info h4 { margin: 0; font-size: 18px; color: #fff; }
+        .upgrade-info p { margin: 6px 0 0; font-size: 13px; color: var(--text-secondary); }
+        .model-name { color: var(--accent-green); font-weight: bold; font-size: 14px; }
         
         .buy-btn {
-            padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 13px;
-            background: #333; color: #777; border: none; cursor: default;
-            transition: 0.3s;
+            padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 14px;
+            background: rgba(255,255,255,0.1); color: #777; border: none; cursor: default;
+            min-width: 90px; text-align: center;
         }
-        /* Когда денег хватает - кнопка цветная */
         .buy-btn.can-buy {
-            background: linear-gradient(45deg, var(--accent-green), #238636);
-            color: white; cursor: pointer;
-            box-shadow: 0 0 10px rgba(46, 160, 67, 0.4);
+            background: linear-gradient(135deg, var(--accent-green), #00b894);
+            color: #000; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 230, 118, 0.3);
         }
         .buy-btn.can-buy:active { transform: scale(0.95); }
 
-        /* LEADERBOARD & FRIENDS */
+        /* LISTS */
         .list-item {
-            display: flex; justify-content: space-between; padding: 15px;
-            background: var(--card-bg); margin-bottom: 8px; border-radius: 10px;
-            border-bottom: 1px solid #333;
+            display: flex; justify-content: space-between; padding: 18px;
+            background: var(--card-bg); margin-bottom: 10px; border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.05); align-items: center;
         }
-        .rank-num { font-weight: bold; color: var(--accent-gold); width: 30px; }
+        .rank-num { font-weight: bold; color: var(--accent-gold); width: 30px; font-size: 18px; }
+        .user-name { font-weight: bold; color: white; font-size: 16px; }
+
         .daily-btn {
-            width: 100%; padding: 20px; background: linear-gradient(45deg, #7f00ff, #e100ff);
-            border: none; border-radius: 15px; color: white; font-weight: bold; font-size: 18px;
-            margin-bottom: 20px; cursor: pointer; opacity: 0.5; pointer-events: none;
+            width: 100%; padding: 25px; background: linear-gradient(45deg, #ff0099, #493240);
+            border: none; border-radius: 18px; color: white; font-weight: bold; font-size: 20px;
+            margin-bottom: 25px; cursor: pointer; opacity: 0.6; pointer-events: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3); text-transform: uppercase;
         }
-        .daily-btn.active { opacity: 1; pointer-events: auto; animation: pulse 2s infinite; }
+        .daily-btn.active { 
+            opacity: 1; pointer-events: auto; 
+            background: linear-gradient(45deg, #ff00cc, #333399);
+            animation: pulse 2s infinite; 
+        }
+        @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.02);} 100% {transform: scale(1);} }
 
-        @keyframes pulse { 0% {box-shadow: 0 0 0 0 rgba(225, 0, 255, 0.4);} 70% {box-shadow: 0 0 0 10px rgba(225, 0, 255, 0);} 100% {box-shadow: 0 0 0 0 rgba(225, 0, 255, 0);} }
-
-        /* NAVIGATION */
+        /* NAV */
         .bottom-nav {
-            display: flex; justify-content: space-around; background: #010409;
-            padding: 15px 0 25px; border-top: 1px solid #30363d;
+            display: flex; justify-content: space-around; background: rgba(0,0,0,0.8);
+            padding: 15px 0 30px; border-top: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
         }
         .nav-btn {
             display: flex; flex-direction: column; align-items: center; color: var(--text-secondary);
-            font-size: 10px; cursor: pointer; transition: 0.2s;
+            font-size: 12px; cursor: pointer; transition: 0.2s; width: 33%;
         }
-        .nav-btn.active { color: var(--text-primary); transform: scale(1.1); }
-        .nav-icon { font-size: 24px; margin-bottom: 5px; }
+        .nav-btn.active { color: white; transform: translateY(-5px); text-shadow: 0 0 10px white; }
+        .nav-icon { font-size: 28px; margin-bottom: 6px; }
 
-        /* FLOATING TEXT */
-        .float-text { position: absolute; color: white; font-weight: bold; font-size: 24px; animation: floatUp 0.8s forwards; pointer-events: none; }
-        @keyframes floatUp { to { transform: translateY(-100px); opacity: 0; } }
+        .float-text { position: absolute; color: white; font-weight: 900; font-size: 32px; animation: floatUp 0.8s forwards; pointer-events: none; text-shadow: 2px 2px 0 #000; }
+        @keyframes floatUp { to { transform: translateY(-120px) rotate(10deg); opacity: 0; } }
 
         #error-toast {
             position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-            background: #ff4b4b; color: white; padding: 10px 20px; border-radius: 20px;
-            font-size: 12px; display: none; z-index: 100;
+            background: #ff4b4b; color: white; padding: 12px 25px; border-radius: 30px;
+            font-size: 14px; display: none; z-index: 100; box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-weight: bold;
         }
+        
+        h2 { font-size: 28px; margin-bottom: 20px; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
     </style>
 </head>
 <body>
 
-    <div id="error-toast">Connection Lost</div>
+    <div id="error-toast">📡 Connection Lost...</div>
 
     <div id="screen-game" class="screen active">
+        <h2 style="text-align:center; font-size:14px; opacity:0.5;" id="title-header">ZOLO KOMBAT</h2>
         <div class="stats-grid">
             <div class="stat-item">
-                <div class="stat-label">Доход в час</div>
+                <div class="stat-label">Майнинг/час</div>
                 <div class="stat-val">+<span id="mining-stat">0</span></div>
             </div>
-            <div class="stat-item">
+            <div class="stat-item" id="energy-click">
                 <div class="stat-label">Энергия</div>
                 <div class="stat-val"><span id="energy">1500</span></div>
             </div>
             <div class="stat-item">
-                <div class="stat-label">Клик</div>
-                <div class="stat-val">x<span id="multitap-stat">1</span></div>
+                <div class="stat-label">CPU</div>
+                <div class="stat-val"><span id="cpu-name">Pentium</span></div>
             </div>
         </div>
 
@@ -157,52 +169,54 @@
     </div>
 
     <div id="screen-earn" class="screen">
-        <h2>🔥 Прокачка</h2>
+        <h2>🛍️ Магазин Железа</h2>
         
-        <button id="daily-btn" class="daily-btn" onclick="claimDaily()">🎁 Забрать награду (50k)</button>
+        <button id="daily-btn" class="daily-btn" onclick="claimDaily()">🎁 Забрать награду</button>
 
         <div class="upgrade-item">
             <div class="upgrade-info">
-                <h4>🚀 Multitap</h4>
-                <p>Увеличивает доход за клик</p>
+                <h4>Процессор (Клик)</h4>
+                <div class="model-name" id="next-cpu">Загрузка...</div>
+                <p>Мощнее проц - сильнее клик</p>
             </div>
             <button class="buy-btn" id="btn-multi" onclick="buy('multitap')">200</button>
         </div>
 
         <div class="upgrade-item">
             <div class="upgrade-info">
-                <h4>⛏️ Mining</h4>
-                <p>Пассивный доход в секунду</p>
+                <h4>Видеокарта (Майнинг)</h4>
+                <div class="model-name" id="next-gpu">Загрузка...</div>
+                <p>Майнит крипту пока ты спишь</p>
             </div>
             <button class="buy-btn" id="btn-mine" onclick="buy('mining')">1000</button>
         </div>
     </div>
 
     <div id="screen-social" class="screen">
-        <h2>🤝 Рефералы</h2>
-        <div style="background: var(--card-bg); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-            <p>Пригласи друга и получи <b>5,000 монет</b>!</p>
-            <button class="buy-btn can-buy" style="width:100%" onclick="inviteFriend()">Пригласить друга</button>
+        <h2>💎 Твоя Банда</h2>
+        <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 16px; margin-bottom: 30px; text-align:center;">
+            <p style="font-size:16px;">Пригласи друга и получи <b>5,000 монет</b>!</p>
+            <button class="buy-btn can-buy" style="width:100%; padding:15px; font-size:16px;" onclick="inviteFriend()">🔗 Пригласить</button>
         </div>
 
-        <h2>🏆 Таблица лидеров</h2>
+        <h2>🏆 Топ Магнатов</h2>
         <div id="leaderboard-list">
-            <div style="text-align:center; color:#777">Загрузка...</div>
+            <div style="text-align:center; color:#777">Загрузка списка...</div>
         </div>
     </div>
 
     <div class="bottom-nav">
         <div class="nav-btn active" onclick="switchTab('game', this)">
-            <div class="nav-icon">🐹</div>
-            <div>Игра</div>
+            <div class="nav-icon">🎮</div>
+            <div>База</div>
         </div>
         <div class="nav-btn" onclick="switchTab('earn', this)">
-            <div class="nav-icon">🚀</div>
-            <div>Бусты</div>
+            <div class="nav-icon">🛒</div>
+            <div>Апгрейд</div>
         </div>
         <div class="nav-btn" onclick="switchTab('social', this)">
-            <div class="nav-icon">👥</div>
-            <div>Друзья</div>
+            <div class="nav-icon">🏆</div>
+            <div>Топ</div>
         </div>
     </div>
 
@@ -211,31 +225,37 @@
         tg.expand();
 
         // ==========================================
-        // 👇 ВСТАВЬ СВОЙ АДРЕС НИЖЕ 👇
-        const SERVER_URL = "https://aboba1234.pythonanywhere.com/"; 
+        // 👇 ТВОЯ ССЫЛКА 👇
+        const SERVER_URL = "https://aboba1234.pythonanywhere.com"; 
         // ==========================================
 
-        const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 111;
-        // Получаем реферальный параметр (start_param)
+        const user = tg.initDataUnsafe.user;
+        const userId = user ? user.id : 12345;
+        const username = user ? (user.username ? `@${user.username}` : user.first_name) : "Gamer";
         const startParam = tg.initDataUnsafe.start_param || null;
 
-        let gameState = { balance: 0, energy: 1500, multitap: 1, mining: 0 };
+        let gameState = { balance: 0, energy: 1500, multitap: 1, mining: 0, daily_amount: 5000 };
         let clicksQueue = 0;
+        let failCount = 0; // Для защиты от Connection Lost
 
-        // UI Элементы
+        // --- ЛОР ИГРЫ (НАЗВАНИЯ) ---
+        const cpuNames = ["Pentium 2", "Celeron", "Core 2 Duo", "Core i3", "Core i5", "Core i7", "Core i9", "Ryzen 9", "Threadripper", "Quantum CPU", "Alien Tech"];
+        const gpuNames = ["Integrated", "Riva TNT", "GeForce 256", "MX 440", "GT 9800", "GTX 660", "GTX 1080", "RTX 3060", "RTX 4090", "H100 Cluster", "Dyson Sphere"];
+
         const els = {
             balance: document.getElementById('balance'),
             energy: document.getElementById('energy'),
             energyBar: document.getElementById('energy-bar'),
-            multiStat: document.getElementById('multitap-stat'),
+            cpuName: document.getElementById('cpu-name'),
             mineStat: document.getElementById('mining-stat'),
             btnMulti: document.getElementById('btn-multi'),
             btnMine: document.getElementById('btn-mine'),
+            nextCpu: document.getElementById('next-cpu'),
+            nextGpu: document.getElementById('next-gpu'),
             dailyBtn: document.getElementById('daily-btn'),
             errorToast: document.getElementById('error-toast')
         };
 
-        // --- API ФУНКЦИЯ ---
         async function apiRequest(endpoint, body = {}) {
             try {
                 const res = await fetch(`${SERVER_URL}${endpoint}`, {
@@ -244,48 +264,46 @@
                     body: JSON.stringify({ user_id: userId, ...body })
                 });
 
-                // Если статус 400 - это логическая ошибка (нет денег), а не сети
                 if (res.status === 400) {
                     const err = await res.json();
                     tg.showAlert(err.error || "Ошибка");
                     return null;
                 }
-
                 if (!res.ok) throw new Error("Network");
                 
+                // Успех - сбрасываем счетчик ошибок
+                failCount = 0;
                 els.errorToast.style.display = 'none';
                 return await res.json();
 
             } catch (e) {
                 console.error(e);
-                // Показываем плашку "Connection Lost"
-                els.errorToast.style.display = 'block';
+                failCount++;
+                // ПОКАЗЫВАЕМ ОШИБКУ ТОЛЬКО ПОСЛЕ 3 НЕУДАЧ (debounce)
+                if (failCount > 3) {
+                    els.errorToast.style.display = 'block';
+                }
                 return null;
             }
         }
 
-        // --- ИНИЦИАЛИЗАЦИЯ ---
         async function initGame() {
-            // Передаем start_param для рефералки
-            const data = await apiRequest('/api/init', { start_param: startParam });
+            const data = await apiRequest('/api/init', { username: username, start_param: startParam });
             if (data) {
                 gameState = data;
                 updateUI();
                 
-                // Ежедневная награда
                 if (data.can_claim_daily) {
                     els.dailyBtn.classList.add('active');
-                    els.dailyBtn.innerText = "🎁 ЗАБРАТЬ 50,000!";
+                    els.dailyBtn.innerText = `🎁 ЗАБРАТЬ +${formatNum(data.daily_amount)}`;
                 } else {
                     els.dailyBtn.classList.remove('active');
                     els.dailyBtn.innerText = "⏳ Жди 24ч";
                 }
-
-                if (data.profit_afk > 0) tg.showAlert(`Ты спал, а Золо заработал: +${data.profit_afk}`);
+                if (data.profit_afk > 0) tg.showAlert(`Пока ты спал, ферма намайнила: +${formatNum(data.profit_afk)}`);
             }
         }
 
-        // --- ТАП ---
         document.getElementById('tapBtn').addEventListener('click', (e) => {
             if (gameState.energy > 0) {
                 gameState.balance += gameState.multitap;
@@ -293,7 +311,6 @@
                 clicksQueue++;
                 updateUI();
                 
-                // Анимация
                 const float = document.createElement('div');
                 float.className = 'float-text';
                 float.innerText = '+' + gameState.multitap;
@@ -306,46 +323,58 @@
             }
         });
 
-        // Отправка кликов
+        // ПАСХАЛКА 1: Клик по заголовку
+        let titleClicks = 0;
+        document.getElementById('title-header').addEventListener('click', () => {
+            titleClicks++;
+            if (titleClicks === 5) {
+                tg.showAlert("Режим разработчика: АКТИВИРОВАН (Шутка)");
+                document.getElementById('tapBtn').classList.add('glitch');
+            }
+        });
+
+        // СИНХРОНИЗАЦИЯ МАЙНИНГА В РЕАЛЬНОМ ВРЕМЕНИ
+        setInterval(() => {
+            if (gameState.mining > 0) {
+                // Добавляем доход в секунду
+                gameState.balance += gameState.mining;
+                updateUI();
+            }
+        }, 1000);
+
         setInterval(async () => {
             if (clicksQueue > 0) {
                 const toSend = clicksQueue; clicksQueue = 0;
                 await apiRequest('/api/tap', { clicks: toSend });
             }
-        }, 2000);
+        }, 3000); // Реже отправляем, чтобы не грузить сеть
 
-        // --- ПОКУПКА ---
         async function buy(type) {
-            // Сначала проверяем локально
             let price = (type === 'multitap') ? 200 * gameState.multitap : 1000 * (gameState.mining + 1);
             if (gameState.balance < price) {
                 tg.HapticFeedback.notificationOccurred('error');
-                tg.showAlert("Не хватает монет!"); 
+                tg.showAlert("Нужно больше золота!"); 
                 return;
             }
-
             const res = await apiRequest('/api/buy', { type: type });
             if (res && res.status === 'ok') {
                 tg.HapticFeedback.notificationOccurred('success');
-                initGame(); // Обновляем данные
+                initGame(); 
             }
         }
 
-        // --- ЕЖЕДНЕВКА ---
         async function claimDaily() {
             const res = await apiRequest('/api/daily');
             if (res && res.status === 'ok') {
                 tg.HapticFeedback.notificationOccurred('success');
-                tg.showAlert("Награда получена!");
+                tg.showAlert(`Получено: ${formatNum(res.reward)} монет!`);
                 initGame();
             }
         }
 
-        // --- ДРУЗЬЯ И ТОП ---
         function inviteFriend() {
-            // Генерируем ссылку
-            const link = `https://t.me/ТВОЙ_БОТ?start=${userId}`;
-            const text = "Заходи в Zolo Kombat, тапай и зарабатывай!";
+            const link = `https://t.me/SuperZoloBot?start=${userId}`;
+            const text = `Я собрал ПК на RTX 4090 в Zolo Kombat! Залетай 👇`;
             const url = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
             tg.openTelegramLink(url);
         }
@@ -357,33 +386,38 @@
                 const list = document.getElementById('leaderboard-list');
                 list.innerHTML = "";
                 users.forEach((u, i) => {
+                    let medal = i === 0 ? '🥇' : (i === 1 ? '🥈' : (i === 2 ? '🥉' : `#${i+1}`));
                     list.innerHTML += `
                         <div class="list-item">
-                            <span class="rank-num">#${i+1}</span>
-                            <span>ID: ${u.id}</span>
-                            <span style="color:gold">${u.balance.toLocaleString()}</span>
+                            <span class="rank-num">${medal}</span>
+                            <span class="user-name">${u.name || 'Аноним'}</span>
+                            <span style="color:gold; font-weight:bold;">${formatNum(u.balance)}</span>
                         </div>`;
                 });
             } catch (e) { console.error(e); }
         }
 
-        // --- ИНТЕРФЕЙС ---
         function updateUI() {
-            els.balance.innerText = gameState.balance.toLocaleString();
+            els.balance.innerText = Math.floor(gameState.balance).toLocaleString();
             els.energy.innerText = Math.floor(gameState.energy);
-            els.multiStat.innerText = gameState.multitap;
-            els.mineStat.innerText = (gameState.mining * 3600).toLocaleString();
+            
+            // Названия железа
+            els.cpuName.innerText = cpuNames[gameState.multitap - 1] || "Alien Tech";
+            els.nextCpu.innerText = "Апгрейд до: " + (cpuNames[gameState.multitap] || "MAX");
+            
+            els.nextGpu.innerText = "Купить: " + (gpuNames[gameState.mining + 1] || "MAX");
+
+            els.mineStat.innerText = formatNum(gameState.mining * 3600);
             
             const pct = (gameState.energy / 1500) * 100;
             els.energyBar.style.width = pct + "%";
 
-            // Логика ЦВЕТНЫХ КНОПОК
             updateBtn(els.btnMulti, 200 * gameState.multitap);
             updateBtn(els.btnMine, 1000 * (gameState.mining + 1));
         }
 
         function updateBtn(btn, price) {
-            btn.innerText = price.toLocaleString();
+            btn.innerText = formatNum(price);
             if (gameState.balance >= price) {
                 btn.classList.add('can-buy');
             } else {
@@ -391,23 +425,25 @@
             }
         }
 
+        function formatNum(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+            return num;
+        }
+
         function switchTab(tab, btn) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen-' + tab).classList.add('active');
-            
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
             if (tab === 'social') loadLeaderboard();
         }
 
         initGame();
         
-        // Реген энергии визуал
         setInterval(() => {
             if (gameState.energy < 1500) { gameState.energy++; updateUI(); }
         }, 1000);
     </script>
 </body>
 </html>
-
