@@ -2,90 +2,383 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zolo Debugger</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zolo Kombat</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; word-wrap: break-word; }
-        h1 { color: #fff; }
-        .box { border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
-        .error { color: #ff3333; font-weight: bold; }
-        .success { color: #33ff33; font-weight: bold; }
-        button { padding: 15px; width: 100%; font-size: 18px; background: #333; color: white; border: none; cursor: pointer; margin-bottom: 20px; }
+        :root {
+            --bg-color: #1c1f24;
+            --card-bg: #2b2f36;
+            --accent-gold: #f3ba2f;
+            --text-primary: #ffffff;
+            --text-secondary: #8b939e;
+            --danger: #ff4b4b;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* --- Верхняя статистика --- */
+        .header-stats {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: var(--card-bg);
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+        }
+
+        .stat-box { text-align: center; }
+        .stat-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-size: 16px; font-weight: bold; color: var(--accent-gold); margin-top: 4px; }
+
+        /* --- Баланс --- */
+        .main-balance {
+            flex-grow: 0;
+            text-align: center;
+            margin: 10px 0;
+            font-size: 42px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 0 0 20px rgba(243, 186, 47, 0.3);
+        }
+        .coin-icon-small { 
+            width: 36px; height: 36px; margin-right: 10px; 
+            background: radial-gradient(circle, #ffd700, #f3ba2f);
+            border-radius: 50%; border: 2px solid #fff;
+            box-shadow: 0 0 10px #f3ba2f;
+        }
+
+        /* --- Зона тапа (Иван Золо) --- */
+        .tap-area-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .tap-img {
+            width: 260px;
+            height: 260px;
+            /* Ссылка на картинку. Если есть своя - замени на 'zolo.png' */
+            background-image: url('https://imgur.com/a/mxuPXvg'); 
+            background-size: cover;
+            background-position: center;
+            border-radius: 50%;
+            box-shadow: 0 0 60px rgba(243, 186, 47, 0.2);
+            cursor: pointer;
+            transition: transform 0.05s ease;
+            image-rendering: pixelated; /* Пиксельный стиль */
+            border: 4px solid rgba(255, 255, 255, 0.1);
+        }
+        .tap-img:active { transform: scale(0.92); }
+
+        /* --- Энергия --- */
+        .energy-container { padding: 0 20px; margin-bottom: 15px; }
+        .energy-text { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; font-weight: 600;}
+        .progress-bar-bg { height: 12px; background: #3b4049; border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #f3ba2f, #ffeb3b); width: 100%; transition: width 0.2s ease-out; }
+
+        /* --- Нижнее меню --- */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(43, 47, 54, 0.95);
+            padding: 12px 0 20px 0;
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-secondary);
+            font-size: 11px;
+            cursor: pointer;
+            width: 33%;
+            transition: transform 0.1s;
+        }
+        .nav-item:active { transform: scale(0.9); }
+        .nav-icon { font-size: 22px; margin-bottom: 4px; filter: grayscale(100%); transition: filter 0.3s; }
+        .nav-item.active .nav-icon { filter: grayscale(0%); }
+        .nav-item.active { color: var(--text-primary); }
+
+        /* --- Анимации и эффекты --- */
+        .floating-text {
+            position: absolute;
+            font-size: 32px;
+            font-weight: 900;
+            color: white;
+            pointer-events: none;
+            animation: floatUp 0.8s ease-out forwards;
+            text-shadow: 2px 2px 0px #000;
+            z-index: 20;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-120px) scale(1.2); }
+        }
+
+        #status-bar {
+            position: absolute; top: 0; left: 0; width: 100%;
+            text-align: center; font-size: 10px; padding: 2px;
+            background: rgba(0,0,0,0.5); display: none;
+        }
     </style>
 </head>
 <body>
 
-    <h1>🔍 Zolo Диагностика</h1>
-    
-    <div class="box">
-        URL Сервера:<br>
-        <b id="url-display">...</b>
+    <div id="status-bar">Connecting...</div>
+
+    <div class="header-stats">
+        <div class="stat-box">
+            <div class="stat-label">Доход в час</div>
+            <div class="stat-value">+<span id="mining-stat">0</span></div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Уровень</div>
+            <div class="stat-value">LVL <span id="level-stat">1</span></div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Сила клика</div>
+            <div class="stat-value">x<span id="multitap-stat">1</span></div>
+        </div>
     </div>
 
-    <button onclick="runTest()">ЗАПУСТИТЬ ТЕСТ</button>
+    <div class="main-balance">
+        <div class="coin-icon-small"></div>
+        <span id="balance">Loading...</span>
+    </div>
 
-    <div id="log">Нажми кнопку...</div>
+    <div class="tap-area-container">
+        <div class="tap-img" id="tapBtn"></div>
+    </div>
+
+    <div class="energy-container">
+        <div class="energy-text">
+            <span>⚡ Energy</span>
+            <span><span id="energy">1500</span> / <span id="max-energy">1500</span></span>
+        </div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="energy-bar"></div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active">
+            <div class="nav-icon">🐹</div>
+            <div>Tap</div>
+        </div>
+        <div class="nav-item" onclick="buyUpgrade('mining')">
+            <div class="nav-icon">⛏️</div>
+            <div>Mine (Buy)</div>
+        </div>
+        <div class="nav-item" onclick="buyUpgrade('multitap')">
+            <div class="nav-icon">🚀</div>
+            <div>Boost (Buy)</div>
+        </div>
+    </div>
 
     <script>
-        // ==========================================
-        // 👇 ВСТАВЬ СВОЮ ССЫЛКУ СЮДА (ТОЧНО КАК ЕСТЬ)
-        const SERVER_URL = "https://aboba1234.pythonanywhere.com"; 
-        // ==========================================
+        const tg = window.Telegram.WebApp;
+        tg.expand(); 
+        tg.enableClosingConfirmation();
 
-        document.getElementById('url-display').innerText = SERVER_URL;
-        const logEl = document.getElementById('log');
+        // =================================================================
+        // 👇 ВСТАВЬ СЮДА СВОЮ ССЫЛКУ ОТ NGROK (https://....ngrok-free.app)
+        const SERVER_URL = "https://aboba1234.pythonanywhere.com/"; 
+        // 👆 ОБЯЗАТЕЛЬНО ПРОВЕРЬ, ЧТОБЫ В КОНЦЕ НЕ БЫЛО СЛЕША "/"
+        // =================================================================
 
-        function log(msg, type = 'info') {
-            const div = document.createElement('div');
-            div.className = type === 'error' ? 'error' : (type === 'success' ? 'success' : '');
-            div.style.marginBottom = "10px";
-            div.innerText = `> ${msg}`;
-            logEl.appendChild(div);
-        }
+        const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 99999;
+        const statusBar = document.getElementById('status-bar');
 
-        async function runTest() {
-            logEl.innerHTML = ''; // Очистка
-            log("Начинаем тест...");
+        let gameState = { balance: 0, energy: 1500, multitap: 1, mining: 0 };
+        let clicksQueue = 0;
+        const maxEnergy = 1500;
 
-            // 1. Проверка протокола
-            if (SERVER_URL.startsWith("http://")) {
-                log("ОШИБКА: Ссылка начинается с http://. А нужно https://", "error");
-                return;
-            }
+        // Элементы UI
+        const balanceEl = document.getElementById('balance');
+        const energyEl = document.getElementById('energy');
+        const energyBar = document.getElementById('energy-bar');
+        const multitapStat = document.getElementById('multitap-stat');
+        const miningStat = document.getElementById('mining-stat');
+        const tapBtn = document.getElementById('tapBtn');
+        const tapContainer = document.querySelector('.tap-area-container');
 
-            // 2. Проверка слеша
-            if (SERVER_URL.endsWith("/")) {
-                log("ПРЕДУПРЕЖДЕНИЕ: Ссылка заканчивается на '/'. Убери его.", "error");
-            }
-
+        // --- Функция для отправки запросов (с защитой от ngrok) ---
+        async function apiRequest(endpoint, body = {}) {
             try {
-                log(`Отправляем запрос на ${SERVER_URL}/api/init ...`);
-                
-                const response = await fetch(`${SERVER_URL}/api/init`, {
+                const response = await fetch(`${SERVER_URL}${endpoint}`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: 12345 })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'ngrok-skip-browser-warning': 'true' // <--- ЭТА СТРОКА РЕШАЕТ ПРОБЛЕМУ
+                    },
+                    body: JSON.stringify({ user_id: userId, ...body })
                 });
 
-                log(`Статус ответа: ${response.status}`);
-
-                if (response.ok) {
-                    const data = await response.json();
-                    log("УСПЕХ! Данные получены:", "success");
-                    log(JSON.stringify(data));
-                } else {
-                    const text = await response.text();
-                    log(`ОШИБКА СЕРВЕРА (${response.status}):`, "error");
-                    log(text.substring(0, 100)); // Первые 100 символов ошибки
-                }
-
+                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+                return await response.json();
             } catch (error) {
-                log("ОШИБКА СЕТИ (Fetch Error):", "error");
-                log(error.message);
-                log("Возможные причины: 1. Сервер выключен. 2. CORS (нет flask-cors). 3. Mixed Content (http вместо https).");
+                console.error("API Error:", error);
+                statusBar.style.display = 'block';
+                statusBar.style.background = 'red';
+                statusBar.innerText = "Connection lost. Reconnecting...";
+                return null;
             }
         }
+
+        // 1. Инициализация игры
+       async function initGame() {
+            // Показываем, что начали грузиться
+            statusBar.style.display = 'block';
+            statusBar.style.background = 'blue';
+            statusBar.innerText = "Попытка соединения...";
+
+            try {
+                // Пытаемся получить данные
+                const response = await fetch(`${SERVER_URL}/api/init`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: userId })
+                });
+
+                // Если сервер ответил ошибкой (например 404 или 500)
+                if (!response.ok) {
+                    throw new Error(`Ошибка сервера: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Если всё ок
+                if (data) {
+                    gameState = data;
+                    updateUI();
+                    statusBar.style.display = 'none'; // Убираем статус
+                    if(data.profit_afk > 0) tg.showAlert(`Намайнил: ${data.profit_afk}`);
+                }
+            } catch (error) {
+                // ВОТ ТУТ МЫ УВИДИМ ОШИБКУ
+                console.error(error);
+                statusBar.style.display = 'block';
+                statusBar.style.background = 'red';
+                // Выводим текст ошибки прямо на экран
+                statusBar.innerText = "ERROR: " + error.message;
+                
+                // Дополнительно покажем Alert для надежности
+                alert("Ошибка подключения: " + error.message);
+            }
+        }
+
+        // 2. Обработка клика (Optimistic UI)
+        tapBtn.addEventListener('click', (e) => {
+            if (gameState.energy > 0) {
+                // Мгновенно обновляем интерфейс, не ожидая сервера
+                gameState.balance += gameState.multitap;
+                gameState.energy -= 1;
+                clicksQueue++;
+                
+                updateUI();
+                tg.HapticFeedback.impactOccurred('medium'); // Вибрация
+                
+                // Анимация вылетающих цифр
+                showFloatingText(e.clientX, e.clientY, `+${gameState.multitap}`);
+            } else {
+                tg.HapticFeedback.notificationOccurred('error'); // Вибрация ошибки
+            }
+        });
+
+        // 3. Отправка кликов на сервер (каждые 1.5 сек)
+        setInterval(async () => {
+            if (clicksQueue > 0) {
+                const toSend = clicksQueue;
+                clicksQueue = 0; // Сбрасываем очередь
+                
+                // Отправляем в фоне
+                await apiRequest('/api/tap', { clicks: toSend });
+            }
+        }, 1500);
+
+        // 4. Покупка улучшений
+        async function buyUpgrade(type) {
+            tg.HapticFeedback.selectionChanged();
+            
+            // Спрашиваем подтверждение (опционально, можно убрать)
+            const confirm = true; 
+            
+            if (confirm) {
+                const result = await apiRequest('/api/buy', { type: type });
+                if (result && result.status === 'ok') {
+                    tg.HapticFeedback.notificationOccurred('success');
+                    initGame(); // Перезагружаем данные с сервера
+                } else {
+                    tg.HapticFeedback.notificationOccurred('error');
+                    tg.showAlert("Недостаточно денег!");
+                }
+            }
+        }
+
+        // Вспомогательные функции
+        function updateUI() {
+            // Форматируем числа (1 000 000)
+            balanceEl.innerText = gameState.balance.toLocaleString();
+            energyEl.innerText = gameState.energy;
+            multitapStat.innerText = gameState.multitap;
+            miningStat.innerText = (gameState.mining * 3600).toLocaleString(); // Доход в час
+            
+            // Обновляем полоску энергии
+            const percentage = Math.max(0, (gameState.energy / maxEnergy) * 100);
+            energyBar.style.width = percentage + "%";
+            
+            // Если энергии мало - красим полоску в красный
+            energyBar.style.background = percentage < 20 
+                ? 'linear-gradient(90deg, #ff4b4b, #ff7e7e)' 
+                : 'linear-gradient(90deg, #f3ba2f, #ffeb3b)';
+        }
+
+        function showFloatingText(x, y, text) {
+            const el = document.createElement('div');
+            el.className = 'floating-text';
+            el.innerText = text;
+            // Рандомный разброс, чтобы цифры не слипались
+            const randomX = (Math.random() - 0.5) * 40;
+            el.style.left = (x + randomX) + 'px';
+            el.style.top = (y - 50) + 'px';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 800);
+        }
+
+        // Запуск!
+        initGame();
+        
+        // Авто-восстановление энергии (визуально)
+        setInterval(() => {
+            if (gameState.energy < maxEnergy) {
+                gameState.energy += 1; // Просто визуально, сервер сам посчитает правильно
+                updateUI();
+            }
+        }, 1000);
+
     </script>
 </body>
 </html>
-
