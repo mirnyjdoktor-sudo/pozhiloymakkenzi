@@ -247,18 +247,46 @@
         }
 
         // 1. Инициализация игры
-        async function initGame() {
-            const data = await apiRequest('/api/init');
-            if (data) {
-                gameState = data;
-                updateUI();
-                statusBar.style.display = 'none'; // Скрываем ошибку, если она была
-                
-                if(data.profit_afk > 0) {
-                    tg.showAlert(`Пока тебя не было, Золо намайнил: ${data.profit_afk} монет!`);
+       async function initGame() {
+            // Показываем, что начали грузиться
+            statusBar.style.display = 'block';
+            statusBar.style.background = 'blue';
+            statusBar.innerText = "Попытка соединения...";
+
+            try {
+                // Пытаемся получить данные
+                const response = await fetch(`${SERVER_URL}/api/init`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: userId })
+                });
+
+                // Если сервер ответил ошибкой (например 404 или 500)
+                if (!response.ok) {
+                    throw new Error(`Ошибка сервера: ${response.status}`);
                 }
-            } else {
-                balanceEl.innerText = "Error";
+
+                const data = await response.json();
+                
+                // Если всё ок
+                if (data) {
+                    gameState = data;
+                    updateUI();
+                    statusBar.style.display = 'none'; // Убираем статус
+                    if(data.profit_afk > 0) tg.showAlert(`Намайнил: ${data.profit_afk}`);
+                }
+            } catch (error) {
+                // ВОТ ТУТ МЫ УВИДИМ ОШИБКУ
+                console.error(error);
+                statusBar.style.display = 'block';
+                statusBar.style.background = 'red';
+                // Выводим текст ошибки прямо на экран
+                statusBar.innerText = "ERROR: " + error.message;
+                
+                // Дополнительно покажем Alert для надежности
+                alert("Ошибка подключения: " + error.message);
             }
         }
 
@@ -354,6 +382,7 @@
     </script>
 </body>
 </html>
+
 
 
 
