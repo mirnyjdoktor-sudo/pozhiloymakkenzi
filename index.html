@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PC Kombat</title>
+    <title>PC Kombat Tycoon</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg: #09090b; --card: #18181b;
-            --grad-main: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
-            --grad-gold: linear-gradient(135deg, #f59e0b, #fbbf24);
-            --grad-green: linear-gradient(135deg, #10b981, #34d399);
-            --text: #ffffff; --text-dim: #71717a;
+            --bg: #050505; --card: #141414;
+            --grad-main: linear-gradient(135deg, #7b2cbf, #f72585);
+            --grad-gold: linear-gradient(135deg, #ff9e00, #ffeb3b);
+            --grad-green: linear-gradient(135deg, #2b9348, #80b918);
+            --grad-gray: linear-gradient(135deg, #343a40, #495057);
+            --text: #ffffff; --text-dim: #9ca3af;
         }
         body {
             margin: 0; padding: 0; background: var(--bg); color: var(--text);
@@ -19,86 +20,75 @@
             height: 100vh; overflow: hidden; display: flex; flex-direction: column;
             user-select: none; -webkit-tap-highlight-color: transparent; touch-action: none;
         }
-        .screen { display: none; flex-direction: column; height: 100%; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .screen { display: none; flex-direction: column; height: 100%; padding: 15px; box-sizing: border-box; overflow-y: auto; }
         .screen.active { display: flex; }
 
-        /* HEADER & STATS */
+        /* HEADER */
         .header {
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
-            background: var(--card); padding: 15px; border-radius: 16px; margin-bottom: 20px;
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+            background: var(--card); padding: 12px; border-radius: 16px; margin-bottom: 20px;
             border: 1px solid rgba(255,255,255,0.05);
         }
         .stat-box { text-align: center; }
-        .stat-lbl { font-size: 10px; color: var(--text-dim); text-transform: uppercase; }
-        .stat-val { font-size: 13px; font-weight: 700; margin-top: 4px; }
+        .stat-lbl { font-size: 9px; color: var(--text-dim); text-transform: uppercase; }
+        .stat-val { font-size: 12px; font-weight: 700; margin-top: 2px; }
         
         .balance-wrap { text-align: center; margin: 10px 0 20px; }
-        .balance { font-size: 42px; font-weight: 900; background: var(--grad-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .curr { font-size: 14px; color: var(--text-dim); font-weight: bold; }
-
-        /* TAP AREA */
-        .tap-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; position: relative; }
+        .balance { font-size: 40px; font-weight: 900; background: var(--grad-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* TAP BTN */
+        .tap-area { flex-grow: 1; display: flex; justify-content: center; align-items: center; }
         .tap-btn {
-            width: 250px; height: 250px; border-radius: 50%;
-            background: var(--grad-main); box-shadow: 0 0 60px rgba(168, 85, 247, 0.4);
-            position: relative; cursor: pointer; display: flex; justify-content: center; align-items: center;
-            touch-action: manipulation;
+            width: 240px; height: 240px; border-radius: 50%;
+            background: var(--grad-main); box-shadow: 0 0 50px rgba(247, 37, 133, 0.3);
+            display: flex; justify-content: center; align-items: center; cursor: pointer;
+            touch-action: manipulation; position: relative; border: 4px solid rgba(255,255,255,0.1);
         }
-        .tap-btn::before { content: "PC"; font-size: 80px; font-weight: 900; color: rgba(255,255,255,0.2); }
-        .tap-btn:active { transform: scale(0.96); transition: 0.05s; }
+        .tap-btn::before { content: "PC"; font-size: 70px; font-weight: 900; color: rgba(0,0,0,0.3); }
+        .tap-btn:active { transform: scale(0.97); }
 
-        .en-wrap { margin: 0 10px; }
-        .en-bar-bg { height: 8px; background: #27272a; border-radius: 4px; overflow: hidden; margin-top: 5px; }
-        .en-bar-fill { height: 100%; background: var(--grad-gold); width: 100%; transition: width 0.1s linear; }
-
-        /* SHOP */
-        .section-title { font-size: 18px; font-weight: 800; margin: 20px 0 10px; color: #fff; }
+        /* SHOP ITEMS */
+        .section-title { font-size: 16px; font-weight: 800; margin: 15px 0 10px; color: #fff; padding-left: 5px; border-left: 3px solid #f72585; }
         .item {
             display: flex; justify-content: space-between; align-items: center;
-            background: var(--card); padding: 16px; margin-bottom: 12px; border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.03);
+            background: var(--card); padding: 14px; margin-bottom: 10px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.03); transition: 0.2s;
         }
-        .item-left h3 { margin: 0; font-size: 15px; color: #fff; }
-        .item-left p { margin: 4px 0 0; font-size: 11px; color: var(--text-dim); }
-        .btn { border: none; padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 12px; cursor: pointer; color: #000; }
-        .btn-buy { background: var(--grad-green); }
-        .btn-lock { background: #27272a; color: #555; pointer-events: none; }
-        .btn-daily { width: 100%; background: var(--grad-main); color: #fff; font-size: 16px; padding: 20px; margin-bottom: 20px; }
-        .btn-daily.cd { opacity: 0.5; pointer-events: none; background: #27272a; }
-
+        .item-left { max-width: 65%; }
+        .item-left h3 { margin: 0; font-size: 14px; color: #fff; }
+        .item-left p { margin: 4px 0 0; font-size: 10px; color: var(--text-dim); line-height: 1.4; }
+        .lvl-badge { background: #333; padding: 2px 5px; border-radius: 4px; font-size: 9px; margin-left: 5px; }
+        
+        .btn { border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 11px; cursor: pointer; color: #fff; min-width: 80px; text-align: center; }
+        .btn-buy { background: var(--grad-green); color: #000; }
+        .btn-gray { background: var(--grad-gray); color: #888; cursor: not-allowed; }
+        
         /* LEADERBOARD */
-        .row { display: flex; justify-content: space-between; padding: 14px; background: var(--card); margin-bottom: 8px; border-radius: 12px; }
-        .rank { font-weight: 900; width: 40px; color: var(--text-dim); }
-        .rank.top { color: #facc15; }
-        
-        .my-rank {
-            position: fixed; bottom: 80px; left: 20px; right: 20px;
-            background: var(--grad-main); padding: 15px; border-radius: 12px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-weight: bold; z-index: 5;
-        }
+        .row { display: flex; align-items: center; padding: 12px; background: var(--card); margin-bottom: 6px; border-radius: 10px; }
+        .rank { font-weight: 900; width: 30px; color: var(--text-dim); font-size: 12px; }
+        .u-info { display: flex; flex-direction: column; margin-left: 10px; flex-grow: 1; }
+        .u-name { font-weight: bold; font-size: 13px; }
+        .u-time { font-size: 10px; color: var(--text-dim); }
+        .u-inc { font-weight: 700; color: #34d399; font-size: 12px; }
 
+        /* NAV */
         .nav {
-            position: fixed; bottom: 0; width: 100%; background: rgba(9,9,11,0.95);
-            display: flex; justify-content: space-around; padding: 12px 0 25px; border-top: 1px solid rgba(255,255,255,0.05); z-index: 10;
+            position: fixed; bottom: 0; width: 100%; background: rgba(5,5,5,0.95);
+            display: flex; justify-content: space-around; padding: 10px 0 25px; 
+            border-top: 1px solid rgba(255,255,255,0.05); z-index: 10;
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #52525b; font-size: 10px; }
-        .nav-item.active { color: #fff; }
-        .nav-icon { font-size: 20px; margin-bottom: 4px; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #52525b; font-size: 9px; }
+        .nav-item.active { color: #f72585; }
+        .nav-icon { font-size: 18px; margin-bottom: 3px; }
 
-        .float { position: absolute; color: #fff; font-weight: 900; font-size: 28px; animation: float 0.5s forwards; pointer-events: none; text-shadow: 0 0 5px rgba(0,0,0,0.5); }
-        @keyframes float { to { transform: translateY(-80px) scale(1.5); opacity: 0; } }
+        .float { position: absolute; color: #fff; font-weight: 900; font-size: 24px; animation: float 0.6s forwards; pointer-events: none; }
+        @keyframes float { to { transform: translateY(-80px); opacity: 0; } }
         
-        /* КНОПКА РЕМОНТА (Показывается при ошибке) */
-        #repair-btn {
-            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-            background: #ef4444; color: white; padding: 10px 20px; border-radius: 20px;
-            font-weight: bold; display: none; z-index: 100;
-        }
+        /* Scroll fix */
+        #shop-content { padding-bottom: 80px; }
     </style>
 </head>
 <body>
-    <a id="repair-btn" href="#" target="_blank">🛠 ПОЧИНИТЬ ИГРУ</a>
 
     <div id="screen-game" class="screen active">
         <div class="header">
@@ -107,211 +97,313 @@
                 <div class="stat-val" style="color:#34d399">₽ <span id="inc-hour">0</span></div>
             </div>
             <div class="stat-box">
-                <div class="stat-lbl">БП (Ватт)</div>
+                <div class="stat-lbl">Ватт</div>
                 <div class="stat-val"><span id="watt-cur">0</span> / <span id="watt-max">0</span></div>
             </div>
             <div class="stat-box">
-                <div class="stat-lbl">Ранг</div>
-                <div class="stat-val">#<span id="my-rank-disp">-</span></div>
+                <div class="stat-lbl">Энергия</div>
+                <div class="stat-val"><span id="en">0</span></div>
             </div>
         </div>
         <div class="balance-wrap">
-            <div class="balance"><span id="bal">Loading</span></div>
-            <div class="curr">Крипторублей</div>
+            <div class="balance"><span id="bal">Loading...</span></div>
+            <div style="font-size:12px; color:#777">CRYPTO RUBLES</div>
         </div>
         <div class="tap-area">
             <div class="tap-btn" id="tapBtn"></div>
         </div>
-        <div class="en-wrap">
-            <div style="display:flex; justify-content:space-between; font-size:12px; color:#777; margin-bottom:5px;">
-                <span>Энергия</span>
-                <span><span id="en">0</span> / <span id="max-en">0</span></span>
-            </div>
-            <div class="en-bar-bg"><div class="en-bar-fill" id="en-bar"></div></div>
-        </div>
-        <div style="height: 80px;"></div>
     </div>
 
     <div id="screen-shop" class="screen">
-        <button id="daily-btn" class="btn btn-daily" onclick="daily()">🎁 Забрать бонус</button>
-        <div class="section-title">🖥️ Железо</div>
+        <div class="section-title">🚀 Основное</div>
         <div id="shop-hardware"></div>
-        <div class="section-title">💿 Софт и Память</div>
-        <div id="shop-soft"></div>
-        <div style="height: 80px;"></div>
-    </div>
+        <div class="section-title">💾 Компоненты</div>
+        <div id="shop-parts"></div>
+        <div id="shop-content"></div> </div>
 
     <div id="screen-top" class="screen">
-        <div class="section-title">🏆 Магнаты</div>
+        <div class="section-title">🏆 ТОП-50 Богачей</div>
         <div id="leaderboard"></div>
-        <div style="height: 140px;"></div>
-    </div>
-    
-    <div id="rank-footer" class="my-rank" style="display:none">
-        <span>Вы: <span id="my-name">User</span></span>
-        <span>#<span id="footer-rank">-</span></span>
+        <div style="padding-bottom: 80px;"></div>
     </div>
 
     <div class="nav">
-        <div class="nav-item active" onclick="tab('game', this)"><span class="nav-icon">💻</span> ПК</div>
-        <div class="nav-item" onclick="tab('shop', this)"><span class="nav-icon">🛍️</span> Апгрейд</div>
-        <div class="nav-item" onclick="tab('top', this)"><span class="nav-icon">📊</span> Рейтинг</div>
+        <div class="nav-item active" onclick="tab('game', this)"><span class="nav-icon">🖥️</span><br>ГЛАВНАЯ</div>
+        <div class="nav-item" onclick="tab('shop', this)"><span class="nav-icon">🛒</span><br>РЫНОК</div>
+        <div class="nav-item" onclick="tab('top', this)"><span class="nav-icon">📊</span><br>РЕЙТИНГ</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
         
-        // ==========================================
-        // 👇 ВСТАВЬ СВОЙ URL ТУТ!
-        const BASE_URL = "https://aboba1234.pythonanywhere.com/"; 
+        // 👇 ТВОЙ URL
+        const BASE_URL = "https://ТВОЙ_НИК.pythonanywhere.com"; 
         const API = BASE_URL + "/api";
-        // ==========================================
 
-        // Кнопка ремонта ведет на главную страницу сервера
-        document.getElementById('repair-btn').href = BASE_URL;
-
-        const user = tg.initDataUnsafe.user;
-        const uid = user ? user.id : 123;
-        const uname = user ? `${user.first_name} ${user.last_name||''}`.trim() : "Player";
+        const uid = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 999;
+        const uname = tg.initDataUnsafe.user ? `${tg.initDataUnsafe.user.first_name} ${tg.initDataUnsafe.user.last_name||''}` : "Guest";
         const startParam = tg.initDataUnsafe.start_param;
 
-        let s = { bal:0, en:1000, maxEn:1000, multi:1, mine:0, ram:1, psu:1, hdd:1, soft:0, rank:0 };
+        // STATE
+        let s = { bal:0, en:1000, maxEn:1000, multi:1, mine:0, ram:1, psu:1, hdd:1, soft:0 };
         let queue = 0;
 
-        const cpuDB = ["Intel 8086","Pentium 1","Pentium 4","Core 2 Duo","Core i3","Core i5","Core i7","Ryzen 7","Core i9","Threadripper","Epyc","Quantum I","Quantum II","Neuro Chip"];
-        const gpuDB = ["No GPU","CGA","VGA","Riva TNT","GeForce 256","GTX 480","GTX 980","GTX 1080","RTX 2080","RTX 3090","RTX 4090","H100 Cluster","Dojo Super","Matrix GPU"];
-        const psuDB = [100,250,400,600,800,1000,1500,2000,3000,5000,10000,50000,100000];
-        const ramDB = ["DIP","SIMM","DDR1","DDR2","DDR3","DDR4","DDR5","HBM2","HBM3","DNA Storage"];
-        const hddDB = ["Floppy 1.44","HDD 40GB","HDD 500GB","SSD 120GB","SSD 1TB","NVMe 4TB","Cloud 1PB","Neural Net"];
+        // --- GENERATE 50 LEVELS OF DATA ---
+        const gens = {
+            cpu: { names: ["Intel 4004", "Intel 8086", "MOS 6502", "Zilog Z80", "Intel 286", "Intel 386", "Intel 486", "Pentium 60", "Pentium Pro", "Pentium II", "Celeron 300", "Pentium III", "Athlon K7", "Pentium 4", "Athlon 64", "Pentium D", "Core 2 Duo", "Phenom X4", "Core i5 750", "Core i7 2600K", "FX 8350", "Core i7 4790K", "Ryzen 1700", "Core i9 9900K", "Ryzen 3900X", "Threadripper", "Core i9 12900K", "Ryzen 7950X", "Epyc Genoa", "Xeon Sapphire", "Apple M2 Ultra", "Quantum Bit 1", "Quantum Bit 4", "Quantum Bit 16", "Neuro Chip v1", "Neuro Chip v2", "Bio-Processor", "Plasma Core", "Photon CPU", "Light Speed I", "Light Speed II", "Dark Matter I", "Dark Matter II", "Antimatter Core", "Black Hole I", "Black Hole II", "Time Warper", "God Chip", "Singularity", "The End"], prefix: "CPU" },
+            gpu: { names: ["MDA Card", "CGA Card", "EGA Card", "VGA Card", "S3 Trio", "Voodoo 1", "Riva 128", "Voodoo 2", "Riva TNT2", "GeForce 256", "Radeon 7500", "GeForce 4 Ti", "Radeon 9800", "GeForce 6800", "GeForce 8800", "HD 5870", "GTX 480", "HD 7970", "GTX 690", "GTX 780 Ti", "GTX 980 Ti", "GTX 1080 Ti", "RTX 2080 Ti", "Radeon VII", "RTX 3090", "RX 6900 XT", "RTX 4090", "RX 7900 XTX", "RTX 5090", "H100 Hopper", "B200 Blackwell", "Tesla Dojo", "Cerebras WSE", "Quantum GPU 1", "Quantum GPU 2", "Holographic I", "Holographic II", "Reality Render", "Sim Matrix I", "Sim Matrix II", "AI Overlord", "Neural Net I", "Neural Net II", "Dyson Link", "Star Forge", "Galaxy Render", "Uni-Verse I", "Uni-Verse II", "Omni-Process", "Infinity"], prefix: "GPU" }
+        };
 
+        // --- MATH & BALANCE (0.05 rule) ---
+        function getPrice(base, lvl) {
+            // Экспоненциальный рост цены: Base * 1.35^lvl
+            return Math.floor(base * Math.pow(1.35, lvl));
+        }
+        function getIncome(price) {
+            // Правило: 0.05 от цены в час
+            // В секунду: (Price * 0.05) / 3600
+            return (price * 0.05) / 3600;
+        }
+
+        // --- API ---
         async function req(ep, body={}) {
             try {
+                // ТИХИЙ РЕЖИМ: Если ошибка - просто игнорим
                 const r = await fetch(API + ep, {
                     method:'POST', headers:{'Content-Type':'application/json'},
                     body:JSON.stringify({user_id:uid, username:uname, ...body})
                 });
-                if(!r.ok) return null;
-                return await r.json();
+                return r.ok ? await r.json() : null;
             } catch(e) { return null; }
         }
 
         async function init() {
             const d = await req('/init', {start_param:startParam});
             if(d) {
-                // Если данные пришли - скрываем кнопку ремонта
-                document.getElementById('repair-btn').style.display = 'none';
                 const u = d.user;
                 s = { 
                     bal: u.balance, en: u.energy, maxEn: u.max_energy, 
                     multi: u.multitap_level, mine: u.mining_level, 
-                    ram: u.ram_level, psu: u.psu_level, 
-                    hdd: u.hdd_level, soft: u.software_level, 
-                    rank: d.rank, last_daily: u.last_daily 
+                    ram: u.ram_level, psu: u.psu_level, hdd: u.hdd_level, soft: u.software_level 
                 };
-                draw(); drawShop();
-            } else {
-                // Если данных нет - показываем кнопку ремонта
-                document.getElementById('repair-btn').style.display = 'block';
-                document.getElementById('bal').innerText = "Error";
+                updateUI();
+                renderShop();
+                if(d.profit_afk > 0) tg.showAlert(`AFK Доход: +${format(d.profit_afk)} ₽`);
             }
         }
 
-        function draw() {
-            document.getElementById('bal').innerText = Math.floor(s.bal).toLocaleString();
+        // --- RENDER ---
+        function updateUI() {
+            document.getElementById('bal').innerText = format(s.bal);
             document.getElementById('en').innerText = Math.floor(s.en);
-            document.getElementById('max-en').innerText = s.maxEn;
-            document.getElementById('en-bar').style.width = (s.en/s.maxEn*100) + "%";
-            document.getElementById('my-rank-disp').innerText = s.rank;
+            
+            // Income Calc (Same as server)
+            const curLvl = s.mine;
+            const priceCurrent = getPrice(1000, curLvl); // Цена текущего уровня
+            // У нас доход считается от уровня.
+            // Упрощенная формула визуализации:
+            // Доход = ур * (5 + ур) * софт
+            const base = s.mine * (5 + s.mine);
+            const soft = 1 + (s.soft * 0.1);
+            const incHour = Math.floor(base * soft * 3600 / 10);
+            
+            document.getElementById('inc-hour').innerText = format(incHour);
 
-            const used = (s.multi * 10) + (s.mine * 20);
-            const maxW = psuDB[s.psu-1] || 999999;
+            // Watts
+            const used = (s.multi * 10) + (s.mine * 25);
+            const maxW = 200 * Math.pow(1.5, s.psu-1);
             const wEl = document.getElementById('watt-cur');
-            wEl.innerText = used; wEl.style.color = used > maxW ? '#ef4444' : '#fff';
-            document.getElementById('watt-max').innerText = maxW;
-
-            const baseInc = s.mine * 5;
-            const mult = 1 + (s.soft * 0.1);
-            document.getElementById('inc-hour').innerText = Math.floor(baseInc * mult * 3600).toLocaleString();
-
-            const db = document.getElementById('daily-btn');
-            if(Date.now()/1000 - s.last_daily > 86400) { db.classList.remove('cd'); db.innerText = "🎁 ЗАБРАТЬ БОНУС"; }
-            else { db.classList.add('cd'); db.innerText = "⏳ Жди 24ч"; }
+            wEl.innerText = Math.floor(used);
+            document.getElementById('watt-max').innerText = Math.floor(maxW);
+            wEl.style.color = used > maxW ? '#ff4444' : '#fff';
         }
 
-        function drawShop() {
-            const hw = document.getElementById('shop-hardware'); const sf = document.getElementById('shop-soft');
-            hw.innerHTML = ""; sf.innerHTML = "";
+        function renderShop() {
+            const hw = document.getElementById('shop-hardware');
+            const pt = document.getElementById('shop-parts');
+            hw.innerHTML = ""; pt.innerHTML = "";
 
-            const psuIdx = s.psu-1;
-            addItem(hw, "⚡ Блок питания", `${psuDB[psuIdx]}W ➔ ${psuDB[psuIdx+1]||'MAX'}W`, s.psu, Math.floor(500 * Math.pow(1.5, s.psu)), 'psu');
+            // --- БАЛАНСИРОВКА ---
+            // 1. CPU (Multitap)
+            // Base Price: 200
+            const cpuLvl = s.multi;
+            const cpuPrice = getPrice(200, cpuLvl);
+            const cpuClick = Math.floor(cpuLvl * (1 + cpuLvl * 0.1));
+            const cpuNextClick = Math.floor((cpuLvl+1) * (1 + (cpuLvl+1) * 0.1));
+            const cpuName = gens.cpu.names[cpuLvl-1] || `CPU MK-${cpuLvl}`;
+            const cpuNext = gens.cpu.names[cpuLvl] || `CPU MK-${cpuLvl+1}`;
+            
+            // 2. GPU (Mining)
+            // Base Price: 1000
+            const gpuLvl = s.mine;
+            const gpuPrice = getPrice(1000, gpuLvl);
+            // Доход в час (примерный)
+            const incNow = Math.floor(gpuLvl*(5+gpuLvl) * 360);
+            const incNext = Math.floor((gpuLvl+1)*(5+gpuLvl+1) * 360);
+            const gpuName = gens.gpu.names[gpuLvl] || `GPU MK-${gpuLvl+1}`;
 
-            const cpuUsed = ((s.multi+1)*10) + (s.mine*20);
-            addItem(hw, "💻 Процессор", `${cpuDB[s.multi-1]||'Old'} ➔ ${cpuDB[s.multi]||'MAX'}`, s.multi, Math.floor(200 * Math.pow(1.5, s.multi)), 'multitap', cpuUsed <= psuDB[s.psu-1]);
+            // Проверка GAP (Разница уровней)
+            // Ищем минимальный уровень среди всех бустов
+            const lvls = [s.multi, s.mine, s.ram, s.psu, s.hdd];
+            const minLvl = Math.min(...lvls);
+            
+            // Функция рендера кнопки
+            const makeBtn = (cont, type, name, desc, lvl, price, curVal) => {
+                const canAfford = s.bal >= price;
+                // GAP CHECK: Нельзя качать если разница > 3 (кроме софта и энергии)
+                // Но можно качать, если этот буст сам является отстающим (lvl <= minLvl)
+                const isGapBlock = (lvl - minLvl) >= 3;
+                
+                let btnClass = canAfford ? 'btn-buy' : 'btn-gray';
+                let btnText = `₽ ${format(price)}`;
+                let status = "";
 
-            const gpuUsed = (s.multi*10) + ((s.mine+1)*20);
-            addItem(hw, "🎮 Видеокарта", `${gpuDB[s.mine]||'None'} ➔ ${gpuDB[s.mine+1]||'MAX'}`, s.mine, Math.floor(1000 * Math.pow(1.4, s.mine)), 'mining', gpuUsed <= psuDB[s.psu-1]);
+                if (isGapBlock && type !== 'soft' && type !== 'energy') {
+                    btnClass = 'btn-gray';
+                    btnText = "LOCKED";
+                    // Найти что качать
+                    const weak = [];
+                    if(s.multi==minLvl) weak.push("CPU");
+                    if(s.mine==minLvl) weak.push("GPU");
+                    if(s.ram==minLvl) weak.push("RAM");
+                    if(s.psu==minLvl) weak.push("PSU");
+                    if(s.hdd==minLvl) weak.push("HDD");
+                    status = `<span style="color:#ef4444">⚠️ Прокачай: ${weak[0]}</span>`;
+                }
 
-            addItem(sf, "💾 ОЗУ", `${ramDB[s.ram-1]} ➔ ${ramDB[s.ram]}`, s.ram, Math.floor(500 * Math.pow(1.3, s.ram)), 'ram');
-            addItem(sf, "💿 Жесткий диск", `${hddDB[s.hdd-1]} ➔ ${hddDB[s.hdd]}`, s.hdd, Math.floor(3000 * Math.pow(2.0, s.hdd)), 'hdd');
-            addItem(sf, "📀 Майнер Soft", s.soft < s.hdd*5 ? "+10% к доходу" : "НУЖЕН HDD!", s.soft, Math.floor(5000 * Math.pow(1.8, s.soft)), 'software', s.soft < s.hdd*5);
-            addItem(sf, "🔋 Батарея", "+500 Макс Энергии", "", Math.floor(1000 * (s.maxEn/1000)), 'energy');
+                if (lvl >= 50) {
+                    btnClass = 'btn-gray'; btnText = "MAX";
+                }
+
+                const el = document.createElement('div');
+                el.className = 'item';
+                el.innerHTML = `
+                    <div class="item-left">
+                        <h3>${name} <span class="lvl-badge">${lvl}</span></h3>
+                        <p>${desc}<br>${status}</p>
+                    </div>
+                    <button class="btn ${btnClass}" onclick="buy('${type}', ${price}, ${isGapBlock})">${btnText}</button>
+                `;
+                cont.appendChild(el);
+            };
+
+            // RENDER ITEMS
+            makeBtn(hw, 'multitap', cpuNext, `Клик: +${cpuNextClick - cpuClick}`, s.multi, cpuPrice);
+            makeBtn(hw, 'mining', gpuName, `Доход: +${format(incNext - incNow)}/ч`, s.mine, gpuPrice);
+            
+            const ramPrice = getPrice(500, s.ram);
+            makeBtn(pt, 'ram', "ОЗУ Модуль", `Реген энергии: +0.5/сек`, s.ram, ramPrice);
+            
+            const psuPrice = getPrice(500, s.psu);
+            const psuW = Math.floor(200 * Math.pow(1.5, s.psu));
+            makeBtn(pt, 'psu', "Блок Питания", `Лимит: ${psuW}W`, s.psu, psuPrice);
+            
+            const hddPrice = getPrice(800, s.hdd);
+            makeBtn(pt, 'hdd', "SSD Диск", `Позволяет ставить Софт`, s.hdd, hddPrice);
+            
+            const softPrice = getPrice(2000, s.soft);
+            makeBtn(pt, 'software', "Майнер ПО", `Доход: +10% (Нужен SSD)`, s.soft, softPrice);
         }
 
-        function addItem(cont, t, d, l, p, type, ok=true) {
-            const el = document.createElement('div'); el.className = 'item';
-            let cls = 'btn btn-buy', txt = format(p), act = `buy('${type}', ${p})`;
-            if(!ok) { cls='btn btn-lock'; txt='Locked'; } else if(s.bal < p) { cls='btn btn-lock'; }
-            el.innerHTML = `<div class="item-left"><h3>${t} <span style="font-size:10px;color:#555">LVL ${l}</span></h3><p>${d} <br><span style="color:#a855f7;font-weight:bold">₽ ${txt}</span></p></div><button class="${cls}" onclick="${act}">КУПИТЬ</button>`;
-            cont.appendChild(el);
-        }
+        async function buy(type, price, isBlocked) {
+            if(isBlocked) { tg.showAlert("Слишком большой разрыв уровней! Подтяни слабое железо."); return; }
+            if(s.bal < price) return; // Silent fail (button is gray anyway)
 
-        async function buy(t, p) {
-            if(s.bal < p) return;
-            s.bal -= p; draw();
-            const res = await req('/buy', {type:t, price:p});
-            if(res && res.status==='ok') init();
+            // Optimistic Update
+            s.bal -= price;
+            if(type=='multitap') s.multi++;
+            if(type=='mining') s.mine++;
+            if(type=='ram') s.ram++;
+            if(type=='psu') s.psu++;
+            if(type=='hdd') s.hdd++;
+            if(type=='software') s.soft++;
+            
+            updateUI();
+            renderShop(); // Refresh buttons colors immediately
+
+            const res = await req('/buy', {type, price});
+            if(res && res.status==='ok') {
+                // Sync ok
+            } else {
+                // Rollback if error (optional, usually init handles it)
+                init(); 
+            }
         }
 
         async function daily() {
             const res = await req('/daily');
-            if(res && res.status==='ok') init();
+            if(res && res.status === 'ok') {
+                tg.showAlert(`Бонус получен: ${format(res.reward)} ₽`);
+                init();
+            } else {
+                tg.showAlert("Бонус доступен раз в 24 часа!");
+            }
         }
 
+        // --- ACTIONS ---
         const btn = document.getElementById('tapBtn');
         btn.addEventListener('pointerdown', (e) => {
-            e.preventDefault(); 
-            const cost = s.multi; 
-            if(s.en >= cost) {
-                s.bal += cost; s.en -= cost; queue++; draw();
-                const el = document.createElement('div');
-                el.className='float'; el.innerText=`+${cost}`;
-                el.style.left=e.clientX+'px'; el.style.top=e.clientY-40+'px';
-                document.body.appendChild(el);
-                setTimeout(()=>el.remove(), 500);
+            e.preventDefault();
+            const cost = Math.floor(s.multi * (1 + s.multi*0.1)); // Income per tap
+            const enCost = Math.ceil(cost / 2);
+            
+            if(s.en >= enCost) {
+                s.bal += cost;
+                s.en -= enCost;
+                queue++;
+                updateUI();
+                
+                // Anim
+                const fl = document.createElement('div');
+                fl.className = 'float';
+                fl.innerText = `+${format(cost)}`;
+                fl.style.left = e.clientX + 'px';
+                fl.style.top = e.clientY - 40 + 'px';
+                document.body.appendChild(fl);
+                setTimeout(()=>fl.remove(), 600);
                 tg.HapticFeedback.impactOccurred('light');
             }
         });
 
-        setInterval(async()=>{ if(queue>0) { await req('/tap', {clicks:queue}); queue=0; } }, 1500);
+        // Loop
+        setInterval(async()=>{ if(queue>0){ await req('/tap', {clicks:queue}); queue=0; } }, 2000);
+        
+        // Passive Loop
         setInterval(()=>{
-            s.en = Math.min(s.maxEn, s.en + (1+s.ram*0.5)/5);
-            s.bal += (s.mine*5 * (1+s.soft*0.1))/5;
-            draw();
+            const regen = 1 + (s.ram * 0.5);
+            s.en = Math.min(s.maxEn, s.en + (regen/5));
+            // Passive income visual
+            const base = s.mine * (5 + s.mine);
+            const soft = 1 + (s.soft * 0.1);
+            const incSec = (base * soft) / 10;
+            s.bal += incSec / 5;
+            updateUI();
         }, 200);
 
+        // Leaderboard
         async function loadTop() {
             const el = document.getElementById('leaderboard');
-            el.innerHTML = "<div style='text-align:center;color:#555'>Загрузка...</div>";
+            el.innerHTML = "Загрузка...";
             const d = await req('/leaderboard');
             if(!d) return;
             el.innerHTML = "";
-            d.forEach((u,i) => {
-                el.innerHTML += `<div class="row"><span class="rank ${i<3?'top':''}">${i+1}</span><span style="font-weight:bold">${u.name}</span><span style="color:#34d399;font-weight:bold">+${format(u.income)}/ч</span></div>`;
+            
+            d.forEach((u, i) => {
+                // Time played calc
+                const days = Math.floor((Date.now()/1000 - u.created_at) / 86400);
+                const timeStr = days > 0 ? `${days} дн.` : "Новичок";
+                
+                el.innerHTML += `
+                <div class="row">
+                    <div class="rank" style="color:${i<3?'#ffd700':'#777'}">#${i+1}</div>
+                    <div class="u-info">
+                        <span class="u-name">${u.name}</span>
+                        <span class="u-time">В игре: ${timeStr}</span>
+                    </div>
+                    <div class="u-inc">+${format(u.income)}/ч</div>
+                </div>`;
             });
-            document.getElementById('rank-footer').style.display = 'flex';
-            document.getElementById('my-name').innerText = uname;
-            document.getElementById('footer-rank').innerText = s.rank;
         }
 
         function tab(t, btn) {
@@ -319,13 +411,14 @@
             document.getElementById('screen-'+t).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));
             btn.classList.add('active');
-            if(t==='top') loadTop(); else document.getElementById('rank-footer').style.display = 'none';
-            if(t==='shop') drawShop();
+            if(t==='top') loadTop();
+            if(t==='shop') renderShop();
         }
 
         function format(n) {
-            if(n>=1000000) return (n/1000000).toFixed(2)+'M';
-            if(n>=1000) return (n/1000).toFixed(1)+'k';
+            if(n >= 1e9) return (n/1e9).toFixed(2) + 'B';
+            if(n >= 1e6) return (n/1e6).toFixed(2) + 'M';
+            if(n >= 1e3) return (n/1e3).toFixed(1) + 'k';
             return Math.floor(n);
         }
 
@@ -333,4 +426,3 @@
     </script>
 </body>
 </html>
-
